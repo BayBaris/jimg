@@ -1,0 +1,15 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect width="64" height="64" rx="14" fill="#1b1e24"/>
+  <g stroke-width="1.00" stroke-linejoin="round">
+    <path d="M 57.27 34.13 L 45.71 54.16 L 34.86 43.65 L 42.89 38.23 Z" fill="#e8a33d" stroke="#e8a33d"/>
+    <path d="M 42.79 54.95 L 19.67 54.95 L 23.34 40.30 L 32.05 44.55 Z" fill="#e8a33d" stroke="#e8a33d"/>
+    <path d="M 17.52 52.82 L 5.96 32.79 L 20.48 28.65 L 21.15 38.32 Z" fill="#7fd1a3" stroke="#7fd1a3"/>
+    <path d="M 6.73 29.87 L 18.29 9.84 L 29.14 20.35 L 21.11 25.77 Z" fill="#e8a33d" stroke="#e8a33d"/>
+    <path d="M 21.21 9.05 L 44.33 9.05 L 40.66 23.70 L 31.95 19.45 Z" fill="#e8a33d" stroke="#e8a33d"/>
+    <path d="M 46.48 11.18 L 58.04 31.21 L 43.52 35.35 L 42.85 25.68 Z" fill="#7fd1a3" stroke="#7fd1a3"/>
+  </g>
+  <g fill="none" stroke="#dfe3ea" stroke-width="2.80" stroke-linecap="round">
+    <path d="M 26.96 24.02 C 26.96 28.41 25.70 30.53 24.02 32.00 C 25.70 33.47 26.96 35.59 26.96 39.98"/>
+    <path d="M 37.04 24.02 C 37.04 28.41 38.30 30.53 39.98 32.00 C 38.30 33.47 37.04 35.59 37.04 39.98"/>
+  </g>
+</svg>

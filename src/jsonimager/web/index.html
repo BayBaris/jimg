@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:;">
+  <title>JSON Imager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="side">
+      <!-- Baslik TEK SATIRDIR ve yuksekligi arac cubugununkiyle ayni
+           (`--head-h`): iki panelin alt sinirlari hizali olmali. Agac aramasi
+           bu yuzden basligin ALTINA, kendi seridine indi. -->
+      <div class="side-head">
+        <div class="menu-wrap">
+          <!-- Sozcuk isareti `JIMG` (`K-33`) uygulama menusunu acar; eski logo
+               ve "JSON Imager" yazisinin yerinde tek basina durur.
+               ⚠ SATIR ICIDIR, `<img>` degil: zeminsizdir ve rengini temanin
+               belirteclerinden almalidir (`.wm-j` -> `--json`, `.wm-img` ->
+               `--export`); dosyadan yuklenen bir gorsel CSS degiskeni okuyamaz.
+               Bu satir `tools/make_icon.py wordmark_markup()` ciktisinin
+               KOPYASIDIR ve elle degistirilmez — `check_logo` ikisini
+               karsilastirir, ayrisirsa kirmizi yanar. -->
+          <button id="btn-app" class="appbtn" aria-label="Uygulama menüsü"
+                  data-i18n-attr="aria-label:ui.app_menu">
+            <svg class="wordmark" viewBox="0 0 117 40" aria-hidden="true"><path class="wm-j" stroke-width="11" d="M 5.5 5.5 H 19.5 V 27.5 A 7 7 0 0 1 5.5 27.5"></path><path class="wm-img" stroke-width="11" d="M 33.5 5.5 H 47.5 M 40.5 5.5 V 34.5 M 33.5 34.5 H 47.5 M 61.5 34.5 V 5.5 L 70.5 18.5 L 79.5 5.5 V 34.5 M 111.5 7.5 Q 111.5 5.5 105.5 5.5 H 101.5 A 8 8 0 0 0 93.5 13.5 V 26.5 A 8 8 0 0 0 101.5 34.5 H 105.5 Q 111.5 34.5 111.5 28.5 V 20 H 104"></path></svg>
+          </button>
+          <div id="app-menu" class="menu app-menu" hidden></div>
+        </div>
+        <!-- Sozcuk isareti ile dugmeler arasindaki esnek bosluk. -->
+        <span class="head-gap"></span>
+
+        <!-- Menu kanonik ev, ikonlar kisayol: ayni iki eylem `app-menu`
+             icinde de duruyor. -->
+        <button id="btn-open-files" class="btn icon" data-tip="Dosya Aç"
+                aria-label="Dosya Aç"
+                data-i18n-attr="data-tip:ui.open_files|aria-label:ui.open_files">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M7 2.2h2v4.8h4.8v2H9v4.8H7V9H2.2V7H7z"></path>
+          </svg>
+        </button>
+        <button id="btn-open-folder" class="btn icon" data-tip="Klasör"
+                aria-label="Klasör"
+                data-i18n-attr="data-tip:ui.open_folder|aria-label:ui.open_folder">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M1.5 3h3.8l1.4 1.7h6.8a.8.8 0 0 1 .8.8v7a.8.8 0 0 1-.8.8H1.5a.8.8 0 0 1-.8-.8V3.8a.8.8 0 0 1 .8-.8z"></path>
+          </svg>
+        </button>
+
+        <!-- Daraltma paneli TUMDEN gizlemez, dar seride indirir: logo uygulama
+             menusunun tek girisi ve her zaman erisilebilir kalmali.
+             Simge cerceve + dolu sol sutun (VS Code kenar cubugu kalibi); dolu
+             taraf `#side.collapsed` altinda CSS ile yansitilir. -->
+        <button id="btn-side" class="btn icon side-toggle" data-tip="Paneli daralt"
+                aria-label="Paneli daralt" aria-expanded="true"
+                data-i18n-attr="data-tip:ui.collapse|aria-label:ui.collapse">
+          <svg class="ico rail" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="1.4" y="2.7" width="13.2" height="10.6" rx="1.7"
+                  fill="none" stroke="currentColor" stroke-width="1.4"></rect>
+            <rect x="2.8" y="4.1" width="3.4" height="7.8" rx="0.7"
+                  fill="currentColor"></rect>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Buyutec KUTUNUN ICINDE, salt gorsel: `aria-hidden` cunku alanin
+           ne oldugunu zaten `placeholder` soyluyor. -->
+      <div class="side-search">
+        <svg class="ico search-ico" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6.8 1.6a5.2 5.2 0 1 0 3.1 9.4l3.6 3.5 1.1-1.1-3.5-3.6A5.2 5.2 0 0 0 6.8 1.6zm0 1.6a3.6 3.6 0 1 1 0 7.2 3.6 3.6 0 0 1 0-7.2z"></path>
+        </svg>
+        <input id="tree-filter" type="search" placeholder="Ağaçta ara" autocomplete="off"
+               data-i18n-attr="placeholder:ui.tree_search">
+      </div>
+      <div id="tree" class="tree"></div>
+      <!-- Daraltilmis seritte agac gorunmez; acik belgeler burada JSON simgesi
+           olarak durur (bkz. js/shell.js `renderRailDocs`). Yalnizca
+           `#side.collapsed` altinda gorunur. -->
+      <div id="rail-docs" class="rail-docs"></div>
+      <!-- 11.1 — seritteki belgeye tiklayinca tablolari (`openRailPop`). -->
+      <div id="rail-pop" class="menu rail-pop" role="menu" hidden></div>
+      <div id="side-msg" class="side-msg"></div>
+    </aside>
+
+    <main id="main">
+      <!-- Tek satir, soldan saga UC oebek: arama · tabloyu bicimlendiren araclar ·
+           belgeyi disariya tasiyan eylemler. Ayraclar oebek sinirini gosterir.
+           Arama kutusu bosta ikon kadardir ve hover/odakta acilir
+           (bkz. style.css `.search`) — ikonlar hicbir zaman sarmaz. -->
+      <header id="toolbar">
+        <div class="tool-top">
+          <div class="title-block">
+            <h1 id="ds-title">—</h1>
+            <div id="ds-meta" class="ds-meta"></div>
+          </div>
+
+          <div class="tools tools-main">
+            <!-- Bosta buyutec kadar; hover ile acilir, odaklaninca acik kalir
+                 (bkz. style.css `.search`). Ayri bir "buyutec dugmesi" YOK —
+                 kutunun kendisi zaten o boyutta. -->
+            <div class="search">
+              <svg class="ico search-ico" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M6.8 1.6a5.2 5.2 0 1 0 3.1 9.4l3.6 3.5 1.1-1.1-3.5-3.6A5.2 5.2 0 0 0 6.8 1.6zm0 1.6a3.6 3.6 0 1 1 0 7.2 3.6 3.6 0 0 1 0-7.2z"></path>
+              </svg>
+              <input id="filter" type="search" placeholder="Ara ya da @sütun:değer" autocomplete="off"
+                     data-i18n-attr="placeholder:ui.table_search|title:ui.table_search_tip">
+              <!-- 9.29 — `@` yazilirken sutun (transpozede alan) adlari. -->
+              <div id="filter-suggest" class="menu filter-suggest" role="listbox" hidden></div>
+            </div>
+
+            <span class="tool-sep" aria-hidden="true"></span>
+
+            <!-- Kalem: duzenleme kipi (10.5). ⚠ Arama kutusunun SAGINDA durur:
+                 araclar kumesi saga yasli ve kutu hover'da 26 -> 200 px aciliyor,
+                 yani kutunun SOLUNDAKI her dugme o anda yer degistiriyordu —
+                 kullanici kalemi tam tutturamiyordu. Kutunun saginda kalanlar
+                 sabit kalir. `warm`: etkinken turuncu dolar (transpoze ile ayni dil). -->
+            <button id="btn-edit" class="btn icon warm" data-tip="Düzenleme kipi"
+                    aria-pressed="false" aria-label="Düzenleme kipi"
+                    data-i18n-attr="data-tip:ui.edit_mode|aria-label:ui.edit_mode">
+              <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M11.6 1.3 14.7 4.4 5.6 13.5 1.6 14.4 2.5 10.4zM3.9 11l1.1 1.1.9-.2 7-7L11.6 3.6l-7 7z"></path>
+              </svg>
+            </button>
+
+            <!-- `warm`: etkin oldugunda turuncu dolar (filtre mavi dolar). -->
+            <button id="btn-transpose" class="btn icon warm" data-tip="Transpoze"
+                    aria-label="Transpoze — satırlarla sütunları yer değiştir"
+                    data-i18n-attr="data-tip:ui.transpose|aria-label:ui.transpose_aria">⇄</button>
+            <div class="menu-wrap">
+              <!-- Huni satir ici SVG: Unicode'da guvenilir bir huni glifi yok,
+                   yazi tipine birakilirsa tofu kutusu cikar. -->
+              <button id="btn-cols" class="btn icon" data-tip="Filtrele — sütunlar ve gruplar"
+                      aria-label="Sütun ve grup filtresi"
+                      data-i18n-attr="data-tip:ui.filter|aria-label:ui.filter_aria">
+                <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M1.6 2.4h12.8L9.6 8.5v4.4l-3.2 1.7V8.5z"></path>
+                </svg>
+              </button>
+              <div id="col-menu" class="menu" hidden></div>
+            </div>
+            <div class="menu-wrap">
+              <button id="btn-reset" class="btn icon" data-tip="Sıfırla"
+                      aria-label="Görünümü sıfırla"
+                      data-i18n-attr="data-tip:ui.reset|aria-label:ui.reset_aria">↺</button>
+              <div id="reset-menu" class="menu" hidden></div>
+            </div>
+
+            <span class="tool-sep" aria-hidden="true"></span>
+
+            <!-- ⚠ Belge Ozeti panelin sekmesi OLMAKTAN CIKMADI, buraya bir
+                 KISAYOL kondu: kitap simgesi paneli yalnizca o sekmeyle acar
+                 (onizleme — kaydet menusu yok). "Menu kanonik evdir, ikonlar
+                 kisayoldur" kuralinin panel karsiligi; ikisi de ayni etiketi
+                 (`ui.tab_text`) okur ki ad ileride tek yerde degissin.
+                 Renk `--json`: belgenin kendisini gosteriyor, uretilmis bir
+                 cikti degil. -->
+            <button id="btn-doc" class="btn doc icon" data-tip="Belge Özeti"
+                    aria-label="Belge Özeti"
+                    data-i18n-attr="data-tip:ui.tab_text|aria-label:ui.tab_text">
+              <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M9.3 5.2C7.6 3.9 5 3.6 2 4.3v11.4c3-.7 5.6-.4 7.3.9zm1.4 0v11.4c1.7-1.3 4.3-1.6 7.3-.9V4.3c-3-.7-5.6-.4-7.3.9z"></path>
+              </svg>
+            </button>
+
+            <!-- Disket satir ici SVG: Unicode'daki tek karsiligi `💾` ve o bir
+                 EMOJI — isletim sistemi kendi renkleriyle ciziyor, `--export`
+                 rengini almiyor ve oteki ikonlarin yaninda yabanci duruyor. -->
+            <button id="btn-export" class="btn export icon" data-tip="Farklı Kaydet"
+                    aria-label="Farklı Kaydet"
+                    data-i18n-attr="data-tip:ui.export|aria-label:ui.export">
+              <!-- ⚠ Deklansor ve etiket alani NEGATIF alandir (`evenodd`), ayri
+                   bir dolgu rengiyle degil: `.btn.icon .ico path` kurali
+                   `fill: currentColor` dayatiyor ve satir ici bir renk zaten
+                   ezilirdi; ezilmeseydi de hover'da zemin degisince uyumsuz
+                   kalirdi. -->
+              <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M2.5 1.5h8.2L14.5 5.3v9.2a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1zM4.6 2.4h5.5v3.2H4.6zM4.2 9.8h7.6v4.7H4.2z"></path>
+              </svg>
+            </button>
+            <button id="btn-claude" class="btn claude icon" data-tip="Agent"
+                    aria-label="Agent ile analiz"
+                    data-i18n-attr="data-tip:ui.agent|aria-label:ui.agent_aria">✦</button>
+          </div>
+        </div>
+      </header>
+
+      <div id="notes" class="notes"></div>
+
+      <!-- Kose dugmesi tablonun DISINDA durur: tabloya fazladan bir sutun
+           eklemek PNG ciktisiyla sapma yaratirdi. Konumu basligin sol ustune
+           denk gelir ve yatay kaydirmada yerinde kalir. -->
+      <div id="table-area">
+        <button id="tbl-corner" class="tbl-corner" hidden
+                data-tip="Sütun genişliklerini sıfırla"
+                aria-label="Sütun genişliklerini sıfırla"
+                data-i18n-attr="data-tip:ui.reset_widths|aria-label:ui.reset_widths">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 2h5v2H4v3H2zM14 14H9v-2h3V9h2zM2 9h2v3h3v2H2zM9 2h5v5h-2V4H9z"></path>
+          </svg>
+        </button>
+
+        <div id="table-wrap" class="table-wrap">
+          <table id="tbl">
+            <colgroup id="cols"></colgroup>
+            <thead id="thead"></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="placeholder" class="placeholder" data-i18n="ui.placeholder">Soldan bir veri kümesi seçin.</div>
+        </div>
+        <!-- 11.2 — hucrenin sag tik menusu (`openCellMenu`): imlecin yaninda,
+             pencereye gore konumlanir (`position: fixed`). -->
+        <div id="cell-menu" class="menu cell-menu" role="menu" hidden></div>
+      </div>
+
+      <footer id="status" class="status"></footer>
+    </main>
+
+    <!-- Agent sohbeti: ayri bir pencere degil, ana alanin YANINDA duran bir
+         serit. Tablo acik kalirken soru sorulabilsin diye disa aktarma
+         panelinden ayrildi. -->
+    <aside id="cdock" class="cdock" hidden>
+      <div class="cdock-grip" id="cdock-grip" aria-hidden="true"></div>
+
+      <header class="cdock-head">
+        <span class="cdock-mark" aria-hidden="true">✦</span>
+        <div class="cdock-name">
+          <b>Agent</b>
+          <span id="cdock-doc"></span>
+          <!-- 9.27 — degerler gidiyorsa her an gorunur; ayrintisi Ayarlar'da. -->
+          <span id="cdock-values" class="cdock-values" data-i18n="agent.values_on"
+                hidden>Veri gönderimi açık</span>
+        </div>
+        <button id="cdock-info" class="ibtn" aria-label="Bu pencere nasıl çalışır"
+                data-i18n-attr="aria-label:ui.agent_how">i</button>
+        <button id="cdock-new" class="ibtn" aria-label="Sohbeti temizle"
+                data-i18n-attr="aria-label:ui.chat_clear">⟳</button>
+        <button id="cdock-close" class="ibtn close" aria-label="Kapat"
+                data-i18n-attr="aria-label:ui.close">✕</button>
+      </header>
+
+      <div id="cdock-thread" class="cthread"></div>
+
+      <!-- Besteci TEK cercevedir: metin kutusu ustte, denetimler altinda ayni
+           kenarligin icinde. Solda model ve caba secicileri, sagda gonder.
+           Kenarlik ve zemin KAPSAYICIDA durur; textarea seffaf ve
+           kenarliksizdir, yoksa cerceve icinde ikinci bir kutu gorunur. -->
+      <div class="ccompose">
+        <textarea id="cdock-q" rows="1" spellcheck="false" autocomplete="off"
+                  placeholder="Şemanın yapısı hakkında sorun"
+                  data-i18n-attr="placeholder:ui.compose_placeholder"></textarea>
+        <div class="ctools">
+          <div class="menu-wrap">
+            <button id="cdock-model" class="pickbtn" aria-label="Model seç"
+                    data-i18n-attr="aria-label:ui.pick_model"></button>
+            <div id="model-menu" class="menu" hidden></div>
+          </div>
+          <!-- ⚠ Caba secicisi yalnizca cabayi GERCEKTEN gonderen
+               saglayicida gorunur (`AK-16`); gizlenen dugme degil SARMALAYICI,
+               yoksa `.ctools`un 6 px'lik bosluğu bos bir yer birakirdi. -->
+          <div id="cdock-effort-wrap" class="menu-wrap">
+            <button id="cdock-effort" class="pickbtn" aria-label="Çaba düzeyi seç"
+                    data-i18n-attr="aria-label:ui.pick_effort"></button>
+            <div id="effort-menu" class="menu" hidden></div>
+          </div>
+          <button id="cdock-send" class="btn primary csend" aria-label="Gönder"
+                  data-i18n-attr="aria-label:ui.send">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2.9 10.6 8 5.5l5.1 5.1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="cdock-foot" class="cfoot"></div>
+
+      <div id="cdock-pop" class="cpop" hidden>
+        <header>
+          <b data-i18n="ui.pop_title">Agent bu belgede ne yapar?</b>
+          <button id="cpop-close" class="ibtn close" aria-label="Kapat"
+                  data-i18n-attr="aria-label:ui.close">✕</button>
+        </header>
+        <!-- Kalin yazi `**…**` ile sozlukte durur ve `inlineNodes` ile cizilir
+             (`data-i18n-rich`). Boylece metin TEK anahtar olur; parcalara
+             bolunse ceviren kisi cumlenin nereye baglandigini goremezdi.
+             SATIR ICI cizici kullanilir: `renderMarkdown` blok `<p>` uretir ve
+             `<p>` icine `<p>` gecersizdir. `innerHTML` yok — dugumler elle. -->
+        <p data-i18n-rich="ui.pop_body">Belgenin <b>şemasını</b> okur: alan adları, veri
+          tipleri, doluluk oranları ve yapısal ilişkiler. <b>Hücre değerleri
+          gönderilmez</b> — veri hakkında değil, yapı hakkında konuşur.</p>
+        <p data-i18n-rich="ui.pop_reset">Sohbet belge başınadır ve önceki soruları
+          hatırlar; <b>⟳</b> ile sıfırlanır.</p>
+        <button id="cpop-schema" class="btn cpop-link"
+                data-i18n="ui.pop_schema">Gönderilecek şemayı göster</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Ayarlar: disa aktarma paneliyle AYNI kabugu (`.tpanel`) kullanir, yalnizca
+       `dlg` ile kucultulur.
+
+       ⚠ Ust kose kapatma dugmesi YOK (`9.12`): kapatma altbilgideki dugmeye,
+       Escape'e ve ortuye tiklamaya birakildi. Baslik da bu yuzden ortali —
+       tek basina kalan bir metnin sola yaslanmasi icin sebep kalmadi. -->
+  <!-- 9.14.2 — solda dikey sekmeler, sagda ayar SATIRLARI (kullanici karari).
+       Pencere yuksekligi SABIT: sekme degisince zipalamaz, kucuk ekranda da
+       kaplamayla sinirli kalir (`.tpanel.dlg.settings-dlg`). -->
+  <div id="settings-overlay" class="overlay" hidden>
+    <div class="tpanel dlg settings-dlg">
+      <header class="tpanel-head mid">
+        <b data-i18n="ui.settings">Ayarlar</b>
+      </header>
+
+      <div class="set-wrap">
+        <!-- Dolasan `tabindex`: yalnizca secili sekme Tab sirasinda, oteki
+             sekmelere oklarla gecilir (`shell.js showSettingsTab`). -->
+        <nav class="set-nav" role="tablist" aria-orientation="vertical"
+             aria-label="Ayarlar" data-i18n-attr="aria-label:ui.settings">
+          <button id="set-tab-view" class="set-tab on" role="tab" data-tab="view"
+                  aria-controls="set-pane-view" aria-selected="true" tabindex="0">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+              <path fill-rule="evenodd" d="M1 2.5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1V11a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zM2.4 2.9v7.7h11.2V2.9zM5 13.3h6v1.4H5z"></path>
+            </svg>
+            <span data-i18n="ui.set_tab_view">Görünüm</span>
+          </button>
+          <button id="set-tab-agent" class="set-tab" role="tab" data-tab="agent"
+                  aria-controls="set-pane-agent" aria-selected="false" tabindex="-1">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 1c.5 3.3 2.2 5 7 7-4.8 2-6.5 3.7-7 7-.5-3.3-2.2-5-7-7 4.8-2 6.5-3.7 7-7z"></path>
+            </svg>
+            <span data-i18n="ui.set_tab_agent">Agent</span>
+          </button>
+          <button id="set-tab-docs" class="set-tab" role="tab" data-tab="docs"
+                  aria-controls="set-pane-docs" aria-selected="false" tabindex="-1">
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true">
+              <path fill-rule="evenodd" d="M3 1.5h6.3L13 5.2V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2.5a1 1 0 0 1 1-1zM3.4 2.9v10.7h8.2V6.4H8V2.9z"></path>
+            </svg>
+            <span data-i18n="ui.set_tab_docs">Belgeler</span>
+          </button>
+        </nav>
+
+        <div class="dlg-body set-panes">
+          <section id="set-pane-view" class="set-pane" role="tabpanel"
+                   aria-labelledby="set-tab-view">
+            <h2 class="set-title" data-i18n="ui.set_tab_view">Görünüm</h2>
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.language">Dil</span>
+              </span>
+              <select id="set-language"></select>
+            </label>
+            <!-- Tema secimi UC degerlidir; `Sistem` isletim sisteminden cozulur
+                 ama cozum PYTHON'da yapilir (bkz. theme.detect_theme) — arayuze
+                 cozulmus deger gelir, CSS `prefers-color-scheme` kullanmaz. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.theme">Tema</span>
+              </span>
+              <select id="set-theme"></select>
+            </label>
+            <!-- 9.19.3 — ciktinin temasi. Temanin HEMEN altinda: ikisi ayni
+                 sorunun iki yarisi (ekran / cikti). -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.export_theme">Dışa aktarım teması</span>
+              </span>
+              <select id="set-export-theme"></select>
+            </label>
+            <!-- Aile listesi KUCUK ve hazir: Pillow'da kalin metin ayri bir TTF
+                 dosyasi ve adi aileden tahmin edilemez (bkz. theme.FONTS). -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.font">Yazı tipi</span>
+              </span>
+              <select id="set-font"></select>
+            </label>
+            <!-- Boyut ICERIK metnini olcekler (tablo hucreleri, agac); arac
+                 cubugu ve menuler kendi puntolarini koruyor. Ayni sayi sutun
+                 genisligi hesabina da giriyor, yani PNG ekranla birlikte kayar. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.font_size">Yazı boyutu</span>
+              </span>
+              <select id="set-font-size"></select>
+            </label>
+            <!-- 9.19.1 / 9.19.2 — tablo govdesi. Yogunluk yalnizca hucre
+                 dolgusunu degistirir (CSS + cizim ayni sayidan); uzun metin
+                 ayari sutunun SARILIP SARILMAYACAGINI belirler ve tabloyu
+                 yeniden kurdurur. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.density">Satır yoğunluğu</span>
+              </span>
+              <select id="set-density"></select>
+            </label>
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.wrap">Uzun metin</span>
+              </span>
+              <select id="set-wrap"></select>
+            </label>
+          </section>
+
+          <section id="set-pane-agent" class="set-pane" role="tabpanel"
+                   aria-labelledby="set-tab-agent" hidden>
+            <h2 class="set-title" data-i18n="ui.set_tab_agent">Agent</h2>
+            <!-- 9.19.4 — kapaliyken serit ve dugmesi gizlenir, kopru soruyu
+                 reddeder. Alttaki satirlar yerinde kalir: tercihler silinmez,
+                 yeniden acinca oldugu gibi doner. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.agent">Agent</span>
+              </span>
+              <select id="set-agent"></select>
+            </label>
+            <!-- 9.27 — `K-14`un istisnasi, varsayilan kapali. Acikken seritte
+                 "veri gonderimi acik" yazar; sinirlar koprude (`_values_block`). -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.agent_values">Veri gönderimi</span>
+              </span>
+              <select id="set-agent-values"></select>
+            </label>
+            <!-- Agent saglayicisi (9.5.3.2). Liste kopruden gelir (`strings()`
+                 icindeki `providers`), oteki seciciler gibi. Secim `settings.agent
+                 .provider`a yaziliyor ve sohbet seridi ANINDA yeniden yukleniyor:
+                 model listesi saglayiciya bagli. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.provider">Agent sağlayıcısı</span>
+              </span>
+              <select id="set-provider"></select>
+            </label>
+            <!-- 9.21 / `K-34` — ozel saglayicinin adresi. Secici degil METIN
+                 kutusu: uygulamanin kullanicinin yazdigi bir adrese ciktigi tek
+                 yer. Aciklamasi var (`SET_DESC_KEYS`): ne gonderildigini ve
+                 hangi adreslerin kabul edildigini soyler. Kutudan cikinca
+                 yazilir (`shell.js saveCustomUrl`), kural koprude sinanir. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.custom_url">Özel sağlayıcı adresi</span>
+                <span class="set-desc" data-i18n="ui.set_desc_custom"></span>
+              </span>
+              <input id="set-custom-url" class="key-input" type="text" spellcheck="false"
+                     autocomplete="off">
+            </label>
+            <!-- Model listesi (9.5.5.2) BU SEKMENIN ICINDE (9.14.2.1, kullanici
+                 karari: ayarlar icin ikinci pencere acilmaz). Satirlar kopruden
+                 kurulur (`shell.js renderModels`).
+
+                 ⚠ Buradaki saglayici secicisi USTTEKININ AYNISI DEGIL: yalnizca
+                 hangi listenin duzenlendigini secer, `settings.agent.provider`a
+                 DOKUNMAZ. Etiketi bu yuzden ayri (`ui.models_provider`) — yan yana
+                 iki ayni gorunen secici, birinin ne yaptigini yanlis ogretirdi.
+                 Varsayilan olarak KULLANILAN saglayiciyi izler. -->
+            <div id="set-models" class="set-block">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.models">Modeller</span>
+              </span>
+              <label class="dlg-row">
+                <span class="lbl-txt" data-i18n="ui.models_provider">LLM Ailesi</span>
+                <select id="mdl-provider"></select>
+              </label>
+              <div id="mdl-state" class="dlg-sub"></div>
+              <div id="mdl-rows"></div>
+              <!-- Ekleme satiri: kimlik yapistirilir, `Ekle` ya da Enter isler. -->
+              <div class="dlg-row mdl-add">
+                <input id="mdl-new" class="key-input" type="text" spellcheck="false"
+                       autocomplete="off">
+                <button id="mdl-add" class="btn" data-i18n="ui.model_add">Ekle</button>
+              </div>
+              <div class="set-actions">
+                <button id="mdl-reset" class="btn"
+                        data-i18n="ui.models_reset">Varsayılan listeye dön</button>
+              </div>
+            </div>
+            <!-- API anahtarlari (9.5.2.2). Satirlar JS'te KOPRUDEN kurulur: hangi
+                 saglayicinin anahtar istedigi `providers.py` kaydindan geliyor ve
+                 burada sabitlenmis ikinci bir liste, seciciler gibi, zamanla
+                 sapardi. Anahtar isteyen saglayici yoksa blogun tamami gizlenir —
+                 ekrani hazir olmayan madde birakilmaz. -->
+            <div id="set-keys" class="set-block" hidden>
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.api_keys">API Anahtarları</span>
+                <span class="set-desc" data-i18n="ui.set_desc_keys"></span>
+                <!-- 9.18: saglayicilarin notlari SATIRLARIN altinda degil, burada
+                     tek obekte (`fillKeys`). Ayni notu tasiyanlar tek satirda. -->
+                <span id="set-keys-info" class="key-info"></span>
+              </span>
+              <div id="set-keys-rows"></div>
+              <div id="set-keys-note" class="dlg-sub" hidden></div>
+            </div>
+          </section>
+
+          <section id="set-pane-docs" class="set-pane" role="tabpanel"
+                   aria-labelledby="set-tab-docs" hidden>
+            <h2 class="set-title" data-i18n="ui.set_tab_docs">Belgeler</h2>
+            <!-- 9.6.5.2 — gorsel adresleri. Onay kutusu degil secici: oteki
+                 tercihlerle ayni kalip ve "Acik" etiketi kapsami (yalnizca https)
+                 tasiyabiliyor. Varsayilan KAPALI (`K-10`). Aciklama ayarin ne
+                 actigini SOYLER: adres bir izleme pikselidir. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.images_url">Görsel adresleri</span>
+                <span class="set-desc" data-i18n="ui.images_url_note"></span>
+              </span>
+              <select id="set-images-url"></select>
+            </label>
+            <!-- 10.5.2 / KB-4 — yedek. Secici kalibi yukaridakiyle ayni; ayar
+                 bir bool. Varsayilan ACIK: ilk kayittan onceki hal saklanir. -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.backup">Yedek (.bak)</span>
+              </span>
+              <select id="set-backup"></select>
+            </label>
+            <!-- 9.19.5 — son oturum. Varsayilan KAPALI: acikken acik belgelerin
+                 yollari diske yazilir. 9.28: secenek etiketi kisalinca bu bilgi
+                 aciklamaya tasindi (`SET_DESC_KEYS`). -->
+            <label class="set-row">
+              <span class="set-text">
+                <span class="lbl-txt" data-i18n="ui.restore">Son oturum</span>
+                <span class="set-desc" data-i18n="ui.set_desc_restore"></span>
+              </span>
+              <select id="set-restore"></select>
+            </label>
+          </section>
+        </div>
+      </div>
+
+      <!-- ⚠ `Kapat`, `Kaydet` DEGIL: ayarlar her degisimde uygulanip diske
+           yaziliyor (`settings_set`) — tema ve puntoyu secerken canli gormenin
+           sebebi bu. "Kaydet" etiketi yapilmis bir isi vaat ederdi. -->
+      <footer class="tpanel-foot dlg-actions">
+        <button id="settings-reset" class="btn"
+                data-i18n="ui.settings_reset">Varsayılanlara dön</button>
+        <button id="settings-close" class="btn primary"
+                data-i18n="ui.close">Kapat</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Ortak soru penceresi (10.5.2): en fazla uc dugme, yaniti soran alir.
+       Kaydedilmemis belgeyi kapatmak, diskte degismis dosyaya yazmak ve
+       (10.5.3) uygulamadan cikmak ayni pencereyi kullanir. Dugmeler JS'ten
+       kurulur; metinleri cagiran verir. -->
+  <div id="ask-overlay" class="overlay" hidden>
+    <div class="tpanel dlg ask-dlg">
+      <header class="tpanel-head mid"><b id="ask-title"></b></header>
+      <div class="dlg-body"><p id="ask-msg" class="ask-msg"></p></div>
+      <footer class="tpanel-foot dlg-actions" id="ask-actions"></footer>
+    </div>
+  </div>
+
+  <!-- Hakkinda: ayarlarla ayni kabuk. Icerik `app_info()`ten gelir ve
+       **dosya yolu icermez** — ayni sozluk tanilama metnini de besliyor. -->
+  <div id="about-overlay" class="overlay" hidden>
+    <div class="tpanel dlg">
+      <header class="tpanel-head">
+        <b data-i18n="ui.about">Hakkında</b>
+        <button id="about-close" class="ibtn close" aria-label="Kapat"
+                data-i18n-attr="aria-label:ui.close">✕</button>
+      </header>
+
+      <div class="dlg-body">
+        <div class="about-top">
+          <img src="logo.svg" class="logo" alt="" width="40" height="40">
+          <div>
+            <b id="about-name">JSON Imager</b>
+            <div id="about-version" class="dlg-sub"></div>
+          </div>
+        </div>
+        <p id="about-local" class="dlg-note" data-i18n="about.local"></p>
+        <div id="about-runtime" class="dlg-kv"></div>
+        <div id="about-third" class="dlg-kv"></div>
+      </div>
+
+      <footer class="tpanel-foot">
+        <span class="dlg-path" data-i18n="about.no_paths"></span>
+        <button id="about-diag" class="btn"
+                data-i18n="ui.diagnostics">Tanılama bilgisini kopyala</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="export-overlay" class="overlay" hidden>
+    <div class="tpanel" id="export-panel">
+      <!-- Ust sekmeler IKON, Win11 gorev cubugu gibi ORTALI; adlar hover'da
+           cikar, secili olan buyur. Uc oebek, ayraclarla ayrilir:
+           Belge Ozeti (belgenin TAMAMI) | Tablo · Agac · Grafik (acik veri
+           kumesinin gorunumleri) | Gorseller (belgenin KENDI icerigi). -->
+      <header class="tpanel-head">
+        <div class="tabs" id="export-tabs">
+          <button class="tab on" data-cat="text" data-tip="Belge Özeti" aria-label="Belge Özeti"
+                  data-i18n-attr="data-tip:ui.tab_text|aria-label:ui.tab_text">
+            <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4 2h8l4 4v12H4zm7 1.5V7h3.5zM6 9h8v1.4H6zm0 3h8v1.4H6zm0 3h5v1.4H6z"></path>
+            </svg>
+          </button>
+
+          <span class="tab-sep" aria-hidden="true"></span>
+
+          <button class="tab" data-cat="table" data-tip="Tablo" aria-label="Tablo"
+                  data-i18n-attr="data-tip:ui.tab_table|aria-label:ui.tab_table">
+            <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2 3h16v14H2zm1.6 3.4v3h5v-3zm6.6 0v3h6.2v-3zM3.6 11v4.4h5V11zm6.6 0v4.4h6.2V11z"></path>
+            </svg>
+          </button>
+          <button class="tab" data-cat="tree" data-tip="Ağaç" aria-label="Ağaç"
+                  data-i18n-attr="data-tip:ui.tab_tree|aria-label:ui.tab_tree">
+            <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M7.5 2h5v3.6h-5zM3 8.6h3.4v1.2H8V7.2H4.6V5.4h-.8v3.2H2v.5zm1 2.4h4v3.6H4zm8 0h4v3.6h-4zM9.4 5.6h1.2v3.2h4.8v1.6h1.2V8.6h-4.8V5.6z"></path>
+            </svg>
+          </button>
+          <button class="tab" data-cat="chart" data-tip="Grafik" aria-label="Grafik"
+                  data-i18n-attr="data-tip:ui.tab_chart|aria-label:ui.tab_chart">
+            <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M3 16.6h14V18H3zM4.4 9h2.8v6.2H4.4zm4.2-4.6h2.8v10.8H8.6zm4.2 6.8h2.8v4H12.8z"></path>
+            </svg>
+          </button>
+
+          <span class="tab-sep" aria-hidden="true"></span>
+
+          <button class="tab" data-cat="gallery" data-tip="Görseller" aria-label="Görseller"
+                  data-i18n-attr="data-tip:ui.tab_gallery|aria-label:ui.tab_gallery">
+            <svg class="ico" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2 4h16v12H2zm1.6 10.4h12.8l-4-5-3 3.6-2-2.2zM6.4 6.4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"></path>
+            </svg>
+          </button>
+        </div>
+        <button id="export-close" class="close-btn" aria-label="Kapat"
+                data-i18n-attr="aria-label:ui.close">✕</button>
+      </header>
+
+      <div class="tpanel-sub" id="cat-text">
+        <div class="seg" id="text-kinds">
+          <button class="segbtn" data-kind="outline" data-i18n="ui.kind_outline">Anahat</button>
+          <button class="segbtn" data-kind="report" data-i18n="ui.kind_report">Belge Raporu</button>
+        </div>
+        <span class="sub-note" id="note-text"></span>
+      </div>
+
+      <!-- Tablo iki alt sekme: ayni veri, iki farkli tasima bicimi. -->
+      <div class="tpanel-sub" id="cat-table" hidden>
+        <div class="seg" id="table-subs">
+          <button class="segbtn on" data-sub="image" data-i18n="ui.sub_image">Görüntü</button>
+          <button class="segbtn" data-sub="markdown" data-i18n="ui.sub_markdown">Markdown</button>
+        </div>
+        <span class="sub-note" id="note-table"></span>
+      </div>
+
+      <div class="tpanel-sub" id="cat-tree" hidden>
+        <span class="sub-note" data-i18n="ui.note_tree">Belgenin şeması: skaler alanlar tek
+          düğümde özetlenir, kayıt dizilerinde ilk kayıt açılır.</span>
+      </div>
+
+      <!-- Grafik: once SORU (oneri kartlari), sonra secici. Kartlar tablodan
+           otomatik turetilir; belgeye ozel hicbir kural yoktur. -->
+      <div class="tpanel-sub" id="cat-chart" hidden>
+        <div class="chart-opts">
+          <!-- Oneriler artik serit halinde degil, "i" dugmesinin icinde: serit
+               fazla yer kapliyor ve kullaniciyi asagidaki secicilerden once
+               kendine cekiyordu. Icerik SECILI MODA gore suzulur. -->
+          <div class="menu-wrap">
+            <button id="chart-info" class="btn icon" data-tip="Öneriler"
+                    aria-label="Grafik önerileri"
+                    data-i18n-attr="data-tip:ui.suggestions|aria-label:ui.suggestions_aria">i</button>
+            <div id="chart-cards" class="menu" hidden></div>
+          </div>
+
+          <div class="seg" id="chart-modes">
+            <button class="segbtn on" data-mode="distribution" data-i18n="ui.mode_distribution">Dağılım</button>
+            <button class="segbtn" data-mode="compare" data-i18n="ui.mode_compare">Karşılaştırma</button>
+          </div>
+
+          <div class="menu-wrap">
+            <button id="chart-type-btn" class="btn ctype" aria-label="Grafik türü"
+                    data-i18n-attr="aria-label:ui.chart_type"></button>
+            <div id="chart-type-menu" class="menu" hidden></div>
+          </div>
+
+          <!-- Etiket metni AYRI bir span icinde: `textContent` yazmak `<select>`i
+               silerdi. `lbl-cat` moda gore JS tarafindan yazilir. -->
+          <label id="lbl-cat"><span class="lbl-txt" data-i18n="ui.lbl_column">Sütun</span> <select id="chart-cat"></select></label>
+          <label id="lbl-agg" hidden><span class="lbl-txt" data-i18n="ui.lbl_measure">Ölçüm</span> <select id="chart-agg"></select></label>
+          <label id="lbl-num" hidden><span class="lbl-txt" data-i18n="ui.lbl_value">Değer</span> <select id="chart-num"></select></label>
+        </div>
+
+        <span class="sub-note" id="note-chart"></span>
+        <!-- Secili olcumun ne ise yaradigi; ustteki aciklamanin yerini almaz,
+             kendi satirinda durur. -->
+        <span class="sub-note agg-note" id="note-agg" hidden></span>
+      </div>
+
+      <div class="tpanel-sub" id="cat-gallery" hidden>
+        <!-- Gorunum kipi URETIM boyutunu da belirliyor (`9.6.2`): kip degisince
+             onizlemeler yeni kutuda YENIDEN isteniyor, buyutulmus kucuk PNG
+             gosterilmiyor. Secim `settings.images.view`e yaziliyor. -->
+        <div class="seg" id="gallery-views" aria-label="Görünüm kipi"
+             data-i18n-attr="aria-label:ui.view_aria">
+          <button class="segbtn" data-view="detail" data-i18n="ui.view_detail">Ayrıntı</button>
+          <button class="segbtn" data-view="list" data-i18n="ui.view_list">Liste</button>
+          <button class="segbtn" data-view="small" data-i18n="ui.view_small">Küçük</button>
+          <button class="segbtn on" data-view="medium" data-i18n="ui.view_medium">Orta</button>
+          <button class="segbtn" data-view="large" data-i18n="ui.view_large">Büyük</button>
+        </div>
+        <span class="sub-note" data-i18n="ui.note_gallery">Belgenin içindeki görseller: gömülü
+          base64 değerler ve belge klasörüne göreli dosya yolları.</span>
+      </div>
+
+      <textarea id="text-out" readonly spellcheck="false"></textarea>
+      <div id="svg-wrap" hidden></div>
+      <div id="gallery-wrap" hidden></div>
+      <div id="tooltip" hidden></div>
+
+      <div class="zoombar" id="zoombar" hidden>
+        <button class="zbtn" id="zoom-out" aria-label="Uzaklaştır"
+                data-i18n-attr="aria-label:ui.zoom_out">−</button>
+        <input type="range" id="zoom-range" min="25" max="400" step="5" value="100">
+        <button class="zbtn" id="zoom-in" aria-label="Yakınlaştır"
+                data-i18n-attr="aria-label:ui.zoom_in">+</button>
+        <span class="zval" id="zoom-val">%100</span>
+        <button class="btn zfit" id="zoom-fit" data-i18n="ui.zoom_fit">Sığdır</button>
+        <button class="btn zfit" id="zoom-reset">%100</button>
+      </div>
+
+      <footer class="tpanel-foot">
+        <span id="text-info"></span>
+        <button id="text-copy" class="btn" data-i18n="ui.copy">Panoya kopyala</button>
+        <!-- 9.6.4 — galerinin kendi iki eylemi. Bicim menusu galeride yok: baytlar
+             ozgun haliyle yaziliyor. Etiketler secim sayisini tasidigi icin JS'te
+             yaziliyor (`paintGallerySelection`), `data-i18n` ile degil. -->
+        <button id="gallery-select" class="btn" hidden></button>
+        <button id="gallery-save" class="btn primary" hidden disabled></button>
+        <div class="menu-wrap">
+          <button id="btn-save" class="btn primary"><span data-i18n="ui.save">Kaydet</span> <span class="caret">▾</span></button>
+          <div id="save-menu" class="menu" hidden></div>
+        </div>
+      </footer>
+      <div class="resize-grip" id="panel-grip" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ES MODULU YOK (K-21): pywebview pencereyi file:// ile acar, `type="module"`
+       orada null origin yuzunden CORS'a takilir ve exe'de SESSIZCE calismaz —
+       dev sunucusu http:// oldugu icin orada sorunsuz gorunur. Dosyalar sirayla
+       yuklenir, tanimlar global kapsamdadir. Sira onemli: `state` en once (butun
+       paylasilan degiskenler orada), `main` en son (init digerlerine dokunur). -->
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/tree.js"></script>
+  <script src="js/table.js"></script>
+  <script src="js/edit.js"></script>
+  <script src="js/columns.js"></script>
+  <script src="js/viewer.js"></script>
+  <script src="js/panel.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/agent.js"></script>
+  <script src="js/shell.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+build/
+dist/
+out/
+
+# PyInstaller'in otomatik urettigi spec'ler izlenmez, elle yazilan tarif izlenir.
+# .gitignore satir ici yorum desteklemez; yorum kendi satirinda olmali.
+*.spec
+!build.spec
+
+# Gercek test belgeleri OZELDIR ve depoya alinmaz (K-09).
+# Dosyalar diskte durur, yalnizca git tarafindan izlenmez.
+samples/
+
+# `examples/` BUNUN TERSIDIR: izlenir ve depoyla birlikte gelir. Iceriginin
+# tamami `tools/make_examples.py` tarafindan uretilir — disaridan alinmis
+# hicbir sey yoktur, bu yuzden public depoya girebilir.

@@ -1,0 +1,24 @@
+# Satir sonlari.
+#
+# Windows'ta git varsayilan olarak calisma kopyasini CRLF'e cevirir. Bu, satir
+# sonuna gorunmez bir \r birakir ve `$` ile biten Grep desenleri eslesmez
+# (ornek: "^```$" hicbir kod blogunu bulamaz). Belgeler ve kaynak icin LF
+# zorunlu tutulur; boylece arama sonuclari tutarli olur.
+
+* text=auto
+
+*.md    text eol=lf
+*.py    text eol=lf
+*.js    text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.json  text eol=lf
+*.spec  text eol=lf
+*.txt   text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.webp  binary
+*.pdf   binary
+*.exe   binary

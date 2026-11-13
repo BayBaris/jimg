@@ -1,0 +1,99 @@
+{
+  "window": {
+    "started_at": "2026-08-16T09:00:00Z",
+    "duration_minutes": 7,
+    "environment": "staging"
+  },
+  "entries": [
+    {
+      "timestamp": "2026-08-16T09:00:04Z",
+      "level": "info",
+      "status": "ok",
+      "service": "checkout-api",
+      "duration_ms": 128
+    },
+    {
+      "timestamp": "2026-08-16T09:00:19Z",
+      "level": "info",
+      "status": "ok",
+      "service": "inventory-service",
+      "duration_ms": 64
+    },
+    {
+      "timestamp": "2026-08-16T09:01:02Z",
+      "level": "warn",
+      "status": "ok",
+      "service": "checkout-api",
+      "duration_ms": 940
+    },
+    {
+      "timestamp": "2026-08-16T09:01:37Z",
+      "level": "error",
+      "status": "failed",
+      "service": "inventory-service",
+      "duration_ms": 2500,
+      "error_code": "E-TIMEOUT",
+      "stack_trace": "Traceback (most recent call last): File \"handlers/checkout.py\", line 214, in reserve_stock response = self._client.post(endpoint, json=payload, timeout=timeout) File \"net/pool.py\", line 88, in post raise UpstreamTimeout(endpoint) UpstreamTimeout: inventory-service did not respond within 2.50s"
+    },
+    {
+      "timestamp": "2026-08-16T09:02:11Z",
+      "level": "info",
+      "status": "ok",
+      "service": "payment-gateway",
+      "duration_ms": 212
+    },
+    {
+      "timestamp": "2026-08-16T09:02:48Z",
+      "level": "info",
+      "status": "ok",
+      "service": "checkout-api",
+      "duration_ms": 143
+    },
+    {
+      "timestamp": "2026-08-16T09:03:20Z",
+      "level": "warn",
+      "status": "ok",
+      "service": "payment-gateway",
+      "duration_ms": 1180
+    },
+    {
+      "timestamp": "2026-08-16T09:03:55Z",
+      "level": "error",
+      "status": "failed",
+      "service": "payment-gateway",
+      "duration_ms": 3010,
+      "error_code": "E-DECLINED",
+      "stack_trace": "Traceback (most recent call last): File \"handlers/checkout.py\", line 214, in reserve_stock response = self._client.post(endpoint, json=payload, timeout=timeout) File \"net/pool.py\", line 88, in post raise UpstreamTimeout(endpoint) UpstreamTimeout: inventory-service did not respond within 2.50s"
+    },
+    {
+      "timestamp": "2026-08-16T09:04:30Z",
+      "level": "info",
+      "status": "ok",
+      "service": "inventory-service",
+      "duration_ms": 77
+    },
+    {
+      "timestamp": "2026-08-16T09:05:08Z",
+      "level": "info",
+      "status": "ok",
+      "service": "checkout-api",
+      "duration_ms": 165
+    },
+    {
+      "timestamp": "2026-08-16T09:05:41Z",
+      "level": "error",
+      "status": "failed",
+      "service": "checkout-api",
+      "duration_ms": 2500,
+      "error_code": "E-TIMEOUT",
+      "stack_trace": "Traceback (most recent call last): File \"handlers/checkout.py\", line 214, in reserve_stock response = self._client.post(endpoint, json=payload, timeout=timeout) File \"net/pool.py\", line 88, in post raise UpstreamTimeout(endpoint) UpstreamTimeout: inventory-service did not respond within 2.50s"
+    },
+    {
+      "timestamp": "2026-08-16T09:06:15Z",
+      "level": "info",
+      "status": "ok",
+      "service": "inventory-service",
+      "duration_ms": 91
+    }
+  ]
+}

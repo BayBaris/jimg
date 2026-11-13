@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Yerleşim matrisi</title>
+  <!-- Yalnizca gelistirme sunucusunda: /__matrix (9.14.5). Uygulamanin CSP'si
+       sayfa icinde iframe acilmasina izin vermez; olcum bu ayri sayfadan
+       yapilir. Exe'ye girmez. -->
+  <style>
+    body { margin: 0; font: 12px/1.4 Consolas, monospace; background: #111; color: #ddd; }
+    #log { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; overflow: auto;
+           padding: 8px; background: #1b1b1b; border-left: 1px solid #333; z-index: 2; }
+    .bad { color: #ff7b72; } .ok { color: #7ee787; }
+    #stage { position: absolute; left: 0; top: 0; }
+    iframe { border: 0; display: block; background: #000; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <pre id="log">çalışıyor…</pre>
+  <script src="/__matrix.js"></script>
+</body>
+</html>

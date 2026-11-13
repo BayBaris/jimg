@@ -1,0 +1,122 @@
+{
+  "catalog": {
+    "title": "Example Product Catalog",
+    "currency": "TRY",
+    "item_count": 8,
+    "generated_by": "tools/make_examples.py"
+  },
+  "products": [
+    {
+      "id": "P-1001",
+      "name": "Aurora Desk Lamp",
+      "category": "Lighting",
+      "price": 249.9,
+      "stock": 34,
+      "active": true,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAAEp0lEQVR42u3dMU4kSRCG0ewQt0DCAgsJiVvhcRY8boWEhMVlMHAQ0E2Ppiozq/73/N2lk/g6suhZ5nB5dd0gVTkCBAACAAGAAEAAIAAQAAgABAACAAGAAEAAIAAQAAgABAACAAGAAEAAIAAQAEzjYuYv7v7x3XdoH16ebub8wg6z/WY4Qy+GxADMvRJCAzD6MggN4M/Rf3u+Mx/7cPvwOmcGwwI4Nv2GPjaGIQ0MCMDoM08GvQP4dfqNvgxGNdA1gJ/Tb/T5NYNuDZTpZ7ifk9DtZ4OdNsC312P0OWcVdNgDZfqZdhV02ANl+kluoEw/yQ3UwAcdGD4t5Q/5ML/1Zqlcfki+CJXLD8kXoXL5IfkiVN7+SV4C5e2f5CVQ3v5JXgJ+LQrN7wVaZUN5+2eNJbDsLcgGwAYAAYAAPACQ9RhgA2ADgABAACAAEAAIAAQAAgABgACg+WtSacv/NUHN/0wngMxxP+cfl4QAdj705//LxSCAlLk//V9UggCC5l4JAjD6p74kGQgga+4tBAEYfQuh+SDM9O/qK7cBDJBVIACjLwNXINPvdQnAlHh1rkCGw3XIBjD9Xq8ATINXLQBz4LULwAQ4AQ/BvvEei20A0+9MBAAC8FbnZATge+x8BGD6nZIATL+zig/A9DsxVyCIDMDbv3PLDcD0O73cAEy/M3QFgsgAvP07SRsAIgPw9u88cwMw/U7VFQgiA/D272xtABAApAXg/uOEbQCIDMDbv3O2AUAAkBaA+4/TtgFAAJAWgPuPM7cBQAAgAAgKwAOAk7cBQAAgABAACAB2H4AfATl/GwAEAAIAAYAAQAAgABAACAAEAAIAAYAAEAAIYKPenu98F52/DQACAAGAAEAAkBCAHwQ5eRsABAACgLgAPAY4cxsABACZAbgFOW0bAAQAmQG4BTlnGwCCA7AEnLANAAKAzADcgpytDQDBAVgCTjV9A2jAeboCQXAAloCTtAEgOABLwBmmbwANOL30K5AGnJtnAAgOwBJwYukbQAPOKv0KpAGnlP4MoAHnk/4QrAEn46dAEByAJeBMPl2Ef79vH16NfvLbQfneOwFXIBPgtQtAA161ADTg9XoI9lhs9G0Aq8CrE4AGvC5XINchoy8AGRh9VyA3Il+5DWAVGH0BZK+CaUsw9wIIXQhGXwCJC8HcCyCxBHMvgNmv4IvHYOgFsO0fQf5TEsZdAD5PoPkgDAQAAgABgABAACAAEAAIAAQAAoAhAbw83bTV/iwk4b5O1NdJswFAACAAGByAxwA29ABgA2AD9AoXJpyi5QNYdkPBqtNVm84Xb/8zBmAJsJW5qh1EjLf/6QL4FqsG+M/pX+laUdtaWLj8bPWTYEuACaeleoarAea5/HTaABpg2unvdAXSAHNOf2vtcHl13ee13T++N78slrMv/X1+iFIDH+StAsZOf9cNcGwPWAVGf+AP0HsHcKwBGRj9IR8fDQhABkZ/nk9OhwVwogExBH6wNerPDYwM4MwMaP6Yw44DkIHRF4ASzL0AxGDoBQDNL8YCAYAAQAAgABAACAAEAAIAAYAAQAAgABAACAAEAAIAAYAAQAAgABAAAoBcH0eM5Q09FzorAAAAAElFTkSuQmCC",
+      "dimensions": {
+        "width_cm": 40,
+        "height_cm": 55,
+        "depth_cm": 30
+      }
+    },
+    {
+      "id": "P-1002",
+      "name": "Basalt Side Table",
+      "category": "Furniture",
+      "price": 1180.0,
+      "stock": 7,
+      "active": true,
+      "image": "assets/p-1002.png",
+      "dimensions": {
+        "width_cm": 47,
+        "height_cm": 58,
+        "depth_cm": 32
+      }
+    },
+    {
+      "id": "P-1003",
+      "name": "Cirrus Shelf Unit",
+      "category": "Storage",
+      "price": 890.5,
+      "stock": 0,
+      "active": false,
+      "image": "assets/p-1003.png",
+      "dimensions": {
+        "width_cm": 54,
+        "height_cm": 61,
+        "depth_cm": 34
+      }
+    },
+    {
+      "id": "P-1004",
+      "name": "Delta Wall Clock",
+      "category": "Decor",
+      "price": 320.0,
+      "stock": 52,
+      "active": true,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAAFyUlEQVR42u3du3EUQRSF4VbXZkGVLKKQSwpY5ICnMPDIQZZSwCUuDKooCiGx7Ew/z/f7rKab8/e90/O6e3f/vgCpVFMAAgAEAAgAEAAgAEAAgAAAAQACAAQACAAQACAAQACAAAABAAIABAAIABAAIABAAIAAwDRcZj6458fv/of24OOXhzkP7G62N8MJPRkSBZB7JoQKIPo0CBXgn9H/9PWDfOzB0+dvc2owTIDX0i/0sTIMcWCAAKKPeTToLcBf0y/6NBjlQFcBXqZf9PFXDbo5UKUfw3mZhG57g50qwB/jEX1cUwo61IEq/Zi2FHSoA1X6kexAlX4kO1AHnugAw9NS3eSD+WmXpar5QXIjVDU/SG6EquYHyY1QtfwjuQhUyz+Si0C1/CO5CHgtCor3AjWpUJZ/tCgC53ZBKgBUAIAAAAGcACDrNEAFgAoAEAAgAEAAgAAAAQACAAQACAAQACg+k4py/meCiofpCJAZ92v+OSUIsHnor/9xMhAgJfdv/0UmECAo90wggOi/dUg0IEBW7hUEAoi+glBcCJP+rY5cBRAgpYAAok8DLZD0GxcBpMTotEDCoR1SAaTfeAkgDUatBVowB1c2Ht0O6enzt/Be6CL9E37b5+U/bHec4Q5cRH+Jb1r9+s0Wh518WnyR/rW+CNjOhMxS4Bxg1Y9h/vyjTmSLXaCBy/+nrx/GrprnHkCgTlX6F41+o4NJc6BK/9LRb3FgUQ5U6Z+/3e9/hDkOVOnf72VVHCh2gTbY57FHpAJMsfyvuzt+8MgT/KnSv/c7OjkQLUB4+jmgAqSnv3hNUKwAR5au/RJzZEQbFwEVIGi9VAeCBLh50do7JTePbtciUKU/bY3kgBYI2FcAy78ioAJIv/ESQBqMOk0At3+ZYRXAQmjskQJY/s2zCmAJNAMEANIEuKEuW/5vnodtuiAVACqAZU8RSJ2Nal8CyXOuBYIWSMVH6pyoAFABNKNInfmq1iN5ZrRA0AIBBAAIABCg2IhAyvxXGx1Inh8tELRAAAEAAgAEAAgAEAAgAEAAgAAAAQACAAQo7l40PwQo7l4s7h4lAEAAgAAAAQACFBsdZoYAxUZEsQVEAIAAar05IQBAAM2oOSeAim82CAAQwNeefWOcAAAB9L5mgAD2gswzASyBxk4ARcAME8BCaNQEkAbjJUDLGp2TiZtHul+HqQJABVAEkoqA5T+iAnBA+rVAThCd+AYLcGTR2i8rR0a08dUVFSDCAWt/qAAHl649cnNwFHtfXK8u3e/tgPRrgXIdkP5/ctEFXp+khQKh6VcBzl/MVknVKccZcl9tdR/vZg5IPwGaOzCnBmcdWNQzFdXzHBtocOLBpD1RVD3TtLQG5x5A4PN0doFW3SOyz0OAQ0vd6QH69YNNTWiX+8zHqS/hD3e3yFMLE5qu98lvErh4x0G7bL385Suj1rO9CX+PhnOAtg5M3rh7i4zboXNzIP0EyE2D9GuB+p0Wi74KIB9GRwApMS4tkHZI9AlAA9HXAsmQI1cBlALRJ8BiqZrWBLknQGhBEH0CJBYEuSdAoglyT4DZW/DTZRB6Aqy9BflfSog7AVxPQHEhDCAAQACAAAABAAIABAAIABAAIABAAGCIAB+/PBRvr0dp/lrV35OmAgAEAAgADBbAaQAWOgFQAaAC+JIh1ln+FxDg3AoFNE1X9TlbxC7/rQRQBLBKrqpvmiN2+W8owB+ycgAH09+orahrFSxofla9EqwIYMK01J7icgDzND+dKgAHMG36O7VAHMCc6S+l3L27f99nbM+P34uXxeLqpr/PJkodeCKvFGBs+rtWgNfqgFIg+gM30HsL8JoDNBD9IZePBghAA9Gf58rpMAHecIAMgRe2Rt03MFKAKzVAcZvDxgLQQPQJwAS5JwAZhJ4AQPFiLIAAAAEAAgAEAAgAEAAgAEAAgAAAAQACAAQACAAQACAAQACAAAABAAIABAAIAAIAufwA/Cm7lV0RhWUAAAAASUVORK5CYII=",
+      "dimensions": {
+        "width_cm": 61,
+        "height_cm": 64,
+        "depth_cm": 36
+      }
+    },
+    {
+      "id": "P-1005",
+      "name": "Ember Floor Lamp",
+      "category": "Lighting",
+      "price": 640.0,
+      "stock": 12,
+      "active": true,
+      "image": "assets/p-1005.png",
+      "dimensions": {
+        "width_cm": 68,
+        "height_cm": 67,
+        "depth_cm": 38
+      }
+    },
+    {
+      "id": "P-1006",
+      "name": "Fjord Storage Box",
+      "category": "Storage",
+      "price": 145.75,
+      "stock": 118,
+      "active": true,
+      "image": "assets/p-1006.png",
+      "dimensions": {
+        "width_cm": 75,
+        "height_cm": 70,
+        "depth_cm": 40
+      }
+    },
+    {
+      "id": "P-1007",
+      "name": "Granite Bookend",
+      "category": "Decor",
+      "price": 95.0,
+      "stock": 61,
+      "active": false,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAAEaklEQVR42u3dsVHrQBSGUfmOu2CGiDZIHTujGiJVQ0bs1I2RMoDBM0i7K/3nVPCe2O9eGWz58PD4NEGqcgkQAAgABAACAAGAAEAAIAAQAAgABAACAAGAAEAAIAAQAAgABAACAAGAAEAAMIzjyP+4+f3kJ7QPr+fLmP+ww2hPhnPoxZAYgHOvhNAAHH0ZhAbw59GfX67Ox05O+dvzmBl0C+DW6XfoY2Po0kCHABx9xsmgdQA/nn5HXwa9GmgawPfT7+jzYwbNGiinn+6+n4RmvxtstAG+/H8cfe5ZBQ32QDn9DLsKGuyBcvpJbqCcfpIbqI4vdKD7aSlv8mEDPax2lsrND8k3QuXmh+QboXLzQ/KNUBn/JC+BMv5JXgJl/JO8BDwWhclzgVbZUMY/ayyBZe+CbABsABAACMALALJeBtgA2AAgABAACAAEAAIAAYAAQAAgABAAU6vvDkIAIID9jn9LQAAggOC7f0tAACCA5K+FswQEAAII/o5oS0AAIIDcP/1aAgIAAQS/88cSEAAIIPiNn5aAAEAAwe/7twQEAAII/tiXJSAAEEDwp34tAQGAAIIf+mAJCAAEEPzMH0tAACCA4Ee+WQICAAEEP/HTEhAACCD4gc+WgABAAMHP+7cEBAACCP66F0tAACCA4G/7sgQEAAII/rJHS0AAIIDg7/q1BAQAAgj+qndLQAAggOABbAkIAAQQPHotAQGAAIKHriUgABBA8Li1BAQAAggetJaAAEAAwSPWEhAACCB4uFoCAgABBI9VS0AAIIDggWoJCAAEEDxKLQEBgACCh6glIAAQQPD4tAQEAAIIHpyWgABAAMEj0xIQAAggeFhaAgIAAQSPSUtAACCA4AFpCQgABBA8Gi0BAYAAgoeiJSAAEEDwOLQEBIAAjP/gQWgJCAABGP+ugABAAIaf6yAAEICx52oIAARg4LkmAgABGHWujABAAIac6yMAEIDx5ioJAARgsLlWAgABGGmumABAAIaZ6yYAEIAx5uoJAARggLmGAgABGF2upABAAIaW6ykAEIBx5aoKAARgULm2AgABGP+usABAAMa/6ywAEIDx72oLAARg/LvmNgDEBmD8u/I2AEQGYPy7/v9x3PoPYH65OoW4BQIBgABAACAAEAAIAAQAAgABgABg2QBezxfvUWNa/113n0+aDQACAAFA5wC8DGBDLwBsAGwAn5cj+FOXywew7IaCVU9X+dA0yR+6r01kCiudq/LkDJKfuVJtYtUA/zz9K91W1LYWFm5+tvqXYEuAAU9LtQxXA4xz89Pq16AaYNTT3+q3QBpgyNM/TdPh4fGpzf9tfj95ri333/S3+SVKdXwhbxXQ9/Q33QC39oBV4Oh3/AV66wBuNSADR7/Ln486BCADR3+cv5x2C+CXBsQQ+IetXu8b6BnAnRngbQ57DkAGjr4AlODcC0AMDr0AYPJgLBAACAAEAAIAAYAAQAAgABAACAAEAAIAAYAAQAAgABAACAAEAAIAASAAyPUBXC6VxLOaKrAAAAAASUVORK5CYII=",
+      "dimensions": {
+        "width_cm": 82,
+        "height_cm": 73,
+        "depth_cm": 42
+      }
+    },
+    {
+      "id": "P-1008",
+      "name": "Harbor Lounge Chair",
+      "category": "Furniture",
+      "price": 2450.0,
+      "stock": 3,
+      "active": true,
+      "image": "assets/p-1008.png",
+      "dimensions": {
+        "width_cm": 89,
+        "height_cm": 76,
+        "depth_cm": 44
+      }
+    }
+  ]
+}

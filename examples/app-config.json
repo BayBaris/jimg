@@ -1,0 +1,77 @@
+{
+  "runtime": {
+    "environment": "staging",
+    "region": "eu-central",
+    "debug": false,
+    "max_upload_mb": 25,
+    "locale": "en-US"
+  },
+  "servers": {
+    "srv-01": {
+      "host": "10.0.1.11",
+      "role": "web",
+      "cores": 4,
+      "active": true
+    },
+    "srv-02": {
+      "host": "10.0.1.12",
+      "role": "web",
+      "cores": 4,
+      "active": true
+    },
+    "srv-03": {
+      "host": "10.0.2.21",
+      "role": "worker",
+      "cores": 8,
+      "active": true
+    },
+    "srv-04": {
+      "host": "10.0.2.22",
+      "role": "worker",
+      "cores": 8,
+      "active": false
+    },
+    "srv-05": {
+      "host": "10.0.3.31",
+      "role": "cache",
+      "cores": 2,
+      "active": true
+    },
+    "srv-06": {
+      "host": "10.0.3.32",
+      "role": "cache",
+      "cores": 2,
+      "active": false
+    }
+  },
+  "thresholds": {
+    "cpu": {
+      "warn": 70,
+      "critical": 90,
+      "window_s": 60,
+      "cooldown_s": 300,
+      "notify": true
+    },
+    "memory": {
+      "warn": 75,
+      "critical": 92,
+      "window_s": 120,
+      "cooldown_s": 600,
+      "notify": true
+    }
+  },
+  "features": {
+    "stable": [
+      "search",
+      "export-csv",
+      "dark-theme"
+    ],
+    "beta": [
+      "chart-suggestions",
+      "image-gallery"
+    ],
+    "disabled": [
+      "legacy-importer"
+    ]
+  }
+}

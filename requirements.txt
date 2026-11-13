@@ -1,0 +1,11 @@
+# JSON Imager — çalışma zamanı bağımlılıkları
+# Python 3.14.6 / Windows
+# Kurulum:  .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+pywebview==6.2.1     # masaüstü pencere + HTML arayüz köprüsü (Windows'ta WebView2)
+pythonnet==3.1.0     # pywebview'in Windows arka ucu (cp314 tekerleği mevcut)
+Pillow==12.3.0       # JSONtoIMG: tablo PNG, ağaç diyagramı, grafik
+truststore==0.10.5   # TLS doğrulamasını Windows'un zincir doğrulayıcısına bırakır (K-35)
+
+# Yalnizca paketleme icin (calisma zamaninda gerekmez):
+pyinstaller==6.22.0  # tek dosya .exe — bkz. build.spec

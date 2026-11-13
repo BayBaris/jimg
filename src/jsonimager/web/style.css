@@ -1,0 +1,1741 @@
+/* --- Olculer: TEMADAN BAGIMSIZ -------------------------------------------
+   Kendi blogunda durur, palet bloklarina karismaz: `check_theme` iki paletin
+   anahtar kumesini karsilastiriyor ve olculer oraya girse iki tarafa da
+   yazilmalari gerekirdi. */
+:root {
+  /* Sol panel basligi ile arac cubugunun ORTAK yuksekligi (js/shell.js). */
+  --head-h: 64px;
+  /* Daraltilmis kenar cubugunun genisligi. 11.1: 46 -> 64 px — sozcuk isareti
+     acik paneldekiyle ayni boyda (20 px) ve belge simgesinin altina kisa ad sigsin. */
+  --rail-w: 64px;
+  /* Acilir arama kutusu (arac cubugu): bosta ikon dugmeleriyle ayni olcu. */
+  --search-idle: 26px;
+  --search-open: 200px;
+}
+
+/* --- Yazi tipi ailesi (Faz 9.4) ------------------------------------------
+   Anahtarlar `theme.FONTS` ile AYNI olmali (`check_theme` denetler), ama
+   degerler ayni DEGIL ve olamaz: tarayici CSS yigini okur, Pillow TTF dosya
+   adi ister. Ortak olan yalnizca anahtar (`system` · `serif` · `mono`);
+   "Georgia" ile `georgia.ttf`in ayni aile oldugunu insan bilir, denetim degil.
+
+   Liste kucuk ve hazir tutulur; gerekcesi `theme.FONTS` yorumunda. */
+:root, :root[data-font="system"] { --font: "Segoe UI", system-ui, sans-serif; }
+:root[data-font="serif"] { --font: Georgia, "Times New Roman", serif; }
+:root[data-font="mono"] { --font: Consolas, "Cascadia Mono", ui-monospace, monospace; }
+
+/* ⚠ **Esaralikli yigin TEK BELIRTECTE toplandi.** Dort ayri kuralda elle
+   tekrarlaniyordu ve kopyalar sessizce ayrismisti (biri Consolas'i tirnakliyor,
+   biri onu basa aliyordu).
+
+   ⚠ Ustteki `--font` satiri BILEREK duz yazili kaldi: o, kullanicinin sectigi
+   aile ve `theme.FONTS` ile esit tutuluyor (`check_theme` Pillow'un ayni yazi
+   tipini bulmasi icin karsilastiriyor) — `var()` ardina saklanirsa denetim
+   karsilastiracak bir deger bulamaz. `--mono` farkli bir soruyu yanitlar:
+   "bu metin, tema ne olursa olsun esaralikli olmak zorunda" (kimlikler, kod
+   blogu, disa aktarma metni). Ikisinin ayni kalmasi denetime baglandi. */
+:root { --mono: Consolas, "Cascadia Mono", ui-monospace, monospace; }
+
+/* --- Palet (Faz 9.4) -----------------------------------------------------
+
+   ⚠ **Govdede sabit renk YAZILMAZ.** Her renk buradaki bir belirtecten gelir;
+   yoksa acik temada o deger koyu kalir ve kimse fark etmez. Yeni bir ton
+   gerekiyorsa once burada ADLANDIRILIR, iki temaya da yazilir.
+
+   ⚠ **Iki blogun anahtar kumesi AYNI olmali.** Acik blokta eksik kalan bir
+   anahtar sessizce koyu degeri miras alir — en sinsi hata bicimi budur.
+   `check.py --> check_theme` esitligi denetler.
+
+   ⚠ **Bir kismi `src/jsonimager/theme.py` ile ESLESIK.** Cizim (PNG/SVG/PDF)
+   ekranla birebir olmak zorunda ve Pillow bu dosyayi okuyamaz; orada ayni ad
+   ayni degerle durur ve denetim ikisini karsilastirir. Golgeler, imlecler ve
+   yalnizca ekranda gorunen tonlar yalnizca burada — ters yon serbest.
+
+   Koyu palet varsayilandir: `data-theme` daha yazilmadan, arayuz ilk boyandigi
+   anda da gecerli olmali. */
+:root, :root[data-theme="dark"] {
+  /* ⚠ Tarayicinin KENDI cizdigi parcalar (kaydirma cubugu, `<select>`in acilan
+     listesi, metin secimi) paletten degil buradan boyanir. Yazilmazsa koyu
+     temada beyaz bir kaydirma cubugu kalir. `export_text._html_css()` ayni
+     satiri uretiyor — ekranda ve ciktida ayni sey gerekiyor. */
+  color-scheme: dark;
+
+  --bg: #14161a;
+  --panel: #1b1e24;
+  --panel-2: #21252d;
+  --line: #2c313b;
+  --text: #dfe3ea;
+  /* Metinden bir tik soluk: agac dallari, rozet metni, kod bloklari. */
+  --text-2: #c6cddb;
+  --muted: #8b93a3;
+
+  --accent: #4c8dff;
+  --accent-dim: #2a3a56;
+  --accent-fg: #cfe0ff;      /* `--accent-dim` zemin uzerindeki metin */
+  --accent-line: #33507c;
+  --on-accent: #ffffff;      /* dolu `--accent` zemin uzerindeki metin */
+
+  --warn: #d8a657;
+  --danger: #ff8a8a;
+  --danger-fg: #ffb4b4;
+  --danger-dim: #2a1c1c;
+  --danger-line: #6b3535;
+  --danger-bg: rgba(255,138,138,.14);
+
+  --row-alt: #191c22;
+  --row-hover: #232833;
+  --row-detail: #171a20;
+  --group-row: #1d222b;
+  --missing: #1e222a;
+  --hatch: rgba(255,255,255,.03);
+  --bool: #7fd1a3;
+
+  /* Cikti eylemleri gorunum kontrollerinden renkle de ayrilir. */
+  --export: #7fd1a3;
+  --export-dim: #1d2a24;
+
+  /* JSON dosyasinin alisildik sari-turuncusu (serit belge simgeleri). */
+  --json: #e8a33d;
+  /* Etkin transpoze. Logonun parantez turuncusuyla ayni deger
+     (`tools/make_icon.py PALETTES["turuncu"].blade`) — marka rengi. */
+  --orange: #f2913d;
+
+  /* Agent seridi: mor, arayuzun geri kalanindan ayrilsin diye. */
+  --agent: #c792ea;
+  --agent-fg: #e6d5f7;
+  --agent-muted: #bda3d4;
+  --agent-line: #4a3a63;
+  --agent-grip: #c792ea44;
+  --agent-pick: #c792ea24;
+  --on-agent: #10151b;       /* dolu `--agent` zemin uzerindeki metin */
+
+  /* Uyari kutulari: mavi bilgi · yesil bulgu · sari uyari (js/table.js). */
+  --note-info-bg: rgba(76,141,255,.10);
+  --note-ok-bg: rgba(127,209,163,.10);
+  --note-ok-fg: #b9e3cd;
+  --note-warn-bg: rgba(216,166,87,.10);
+  --note-warn-fg: #e8d3ab;
+
+  --shot-bg: #0f1216;
+  --overlay: rgba(0,0,0,.55);
+
+  --shadow-sm: 0 6px 16px rgba(0,0,0,.45);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.45);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,.6);
+  --shadow-pop: 0 14px 34px rgba(0,0,0,.55);
+
+  /* Sutun grubu renkleri (columns.py GROUP_ORDER sirasiyla) */
+  --g0: #6ea8fe;  /* Kimlik */
+  --g1: #c792ea;  /* Sınıflandırma */
+  --g2: #7fd1a3;  /* Sayısal */
+  --g3: #e0af68;  /* Bayrak */
+  --g4: #7dcfff;  /* İç içe */
+  --g5: #a0a8b8;  /* Metin */
+  --g6: #6b7280;  /* Diğer */
+}
+
+/* Acik palet KOYUNUN CEVRILMISI DEGILDIR. Koyu zemin icin secilmis pastel
+   tonlar (`#7fd1a3`, `#e0af68`) beyaz uzerinde okunmuyor: acik tarafta ton
+   koyulasir, doygunluk artar. Golgeler de yumusar — koyu temada golge derinlik
+   veriyor, acikta ayni opaklik kir gibi gorunur. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --panel-2: #eaeef4;
+  --line: #d3dae4;
+  --text: #161a20;
+  --text-2: #3f4855;
+  --muted: #5c6675;
+
+  --accent: #2563eb;
+  --accent-dim: #dce8ff;
+  --accent-fg: #14418f;
+  --accent-line: #9dbcf7;
+  --on-accent: #ffffff;
+
+  --warn: #a86a00;
+  --danger: #c02b2b;
+  --danger-fg: #8f1f1f;
+  --danger-dim: #fdecec;
+  --danger-line: #e8b4b4;
+  --danger-bg: rgba(192,43,43,.10);
+
+  --row-alt: #eef1f6;
+  --row-hover: #e6ecf5;
+  --row-detail: #eef2f7;
+  --group-row: #e7ecf3;
+  --missing: #e4e8ee;
+  --hatch: rgba(0,0,0,.05);
+  --bool: #147a4c;
+
+  --export: #147a4c;
+  --export-dim: #dff0e6;
+
+  --json: #b8720b;
+  --orange: #c2610a;
+
+  --agent: #7c3aed;
+  --agent-fg: #4c1d95;
+  --agent-muted: #6b5b8a;
+  --agent-line: #cfbdf2;
+  --agent-grip: #7c3aed44;
+  --agent-pick: #7c3aed1f;
+  --on-agent: #ffffff;
+
+  --note-info-bg: rgba(37,99,235,.09);
+  --note-ok-bg: rgba(20,122,76,.09);
+  --note-ok-fg: #10603c;
+  --note-warn-bg: rgba(168,106,0,.10);
+  --note-warn-fg: #7a4c05;
+
+  --shot-bg: #f0f2f6;
+  --overlay: rgba(18,24,34,.38);
+
+  --shadow-sm: 0 6px 16px rgba(22,32,50,.14);
+  --shadow-md: 0 8px 24px rgba(22,32,50,.16);
+  --shadow-lg: 0 20px 60px rgba(22,32,50,.22);
+  --shadow-pop: 0 14px 34px rgba(22,32,50,.18);
+
+  --g0: #2e5fbf;  /* Kimlik */
+  --g1: #7a3fb5;  /* Sınıflandırma */
+  --g2: #147a4c;  /* Sayısal */
+  --g3: #96650f;  /* Bayrak */
+  --g4: #1f7391;  /* İç içe */
+  --g5: #4d5665;  /* Metin */
+  --g6: #6b7280;  /* Diğer */
+}
+
+* { box-sizing: border-box; }
+
+/* ⚠ **Odak halkasi PALETTEN gelmeli.** Kural yazilmazsa tarayici
+   `-webkit-focus-ring-color` kullanir ve o renk **isletim sisteminin vurgu
+   rengidir**: Windows'u turuncu olan kullanicida arayuzde turuncu bir hat kalir
+   ve paletle hicbir iliskisi olmaz. Olculdu: `rgb(229,151,0)`. Ayarlar
+   ekranindaki `<select>`te goze carpti ama kural genel — halkasi olmayan her
+   odaklanabilir oge ayni rengi aliyordu.
+
+   `:focus-visible`, `:focus` DEGIL: fareyle tiklanan dugmede halka cikmaz,
+   klavyeyle gezilende cikar. `<select>` her iki durumda da sayilir, cunku
+   acilan liste klavyeyle geziliyor.
+
+   Kendi odak isaretini KENARLIKLA veren ogeler (`#tree-filter`, `.search
+   input`, `.chart-opts select`, `#cdock-q`) `outline: none` yaziyor; ozgullukleri
+   bu kurali yeniyor ve bu kasitli — orada halka ikinci bir isaret olurdu. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ⚠ `<select>` halka ALMAZ ve bu bir istisna degil, kalibin kendisi: form
+   kutulari odagi KENARLIKLA gosteriyor (`#tree-filter`, `.search input`,
+   `#cdock-q`). Ayrica Chromium acilan listeyi klavye gezintisi saydigi icin
+   FAREYLE secim yapinca da `:focus-visible` esleser ve halka secimden sonra
+   ekranda kalir — kullanici secimini zaten kapali kutuda okuyor, halka orada
+   hicbir sey soylemiyor. Dugme ve sekmelerde durum farkli: onlarda fare
+   tiklamasi `:focus-visible` saymiyor, halka yalnizca klavyeyle geliyor.
+
+   ⚠ **Renk DEGISKENLE dagitilir, `border-color` ile degil.** Once
+   `select:focus { border-color: … }` yaziliyordu ve HIC CALISMIYORDU:
+   `.dlg-row select` (0,1,1) ile `select:focus` (0,1,1) esit ozgullukte ve
+   oteki dosyada daha altta — kaynak sirasi kazaniyor. Ayni tuzak bu depoda
+   dorduncu kez (`.btn.export`, `.rail-doc`, `.btn.on` ve bu). Ozel ozellik
+   bildirimleri `border` bildirimiyle YARISMADIGI icin ozgulluk onemsizlesir;
+   kalip `--btn-fg` ve `--cur` ile ayni. Kutu kendi kenarligini
+   `var(--field-line, var(--line))` ile yazar, odak yalnizca degiskeni kurar. */
+select:focus, .key-input:focus { outline: none; --field-line: var(--accent); }
+
+/* Yazi tipi ailesi TEK yerden dagitilir: kalitim geri kalanini hallediyor.
+   Kod gosteren alanlar (`#text-out`, `.cmsg code/pre`) bilerek disarida —
+   orada esaralikli olmak bir tercih degil, hizalamanin sarti. */
+/* ⚠ Punto **ICERIK** metnini olcekler: kalitla inen her sey (tablo hucreleri,
+   agac dallari) boyut ayarini izler. KABUK sabit kalir — arac cubugu, menuler,
+   agactaki sayaclar kendi `font-size` bildirimlerini tasir; boylece kabuk ayni
+   boyda durur, veri okunurlugu ayarlanir.
+
+   ⚠ **Tablonun kendi olculeri kabuk degildir**: baslik satiri, grup seridi ve
+   tip rozeti cizimde `theme.metrics()`ten turuyor, dolayisiyla ekranda da
+   turemeli — yoksa punto 12'den ciktigi anda "cikti ekranla birebir"
+   degismezi bozulur (`9.4.5.3`). Turetilmis degerler kopruden gelir ve kok
+   ogeye yazilir (`main.applyShell`); formul CSS'te `calc()` ile IKINCI KEZ
+   yazilmaz.
+
+   ⚠ Varsayilan 13'ten 12'ye indi ve bu KASITLI: cizim tabani 12 idi, yani ekran
+   hucreleri PNG'den bir piksel buyuk cizilyordu. 13 isteyen kullanici artik
+   ayardan secebiliyor. */
+html, body {
+  margin: 0; height: 100%;
+  background: var(--bg); color: var(--text);
+  font: var(--font-size, 12px)/1.45 var(--font);
+  overflow: hidden;
+}
+
+/* ⚠ Form ogeleri yazi tipini KALITMAZ: tarayici onlara kendi varsayilanini
+   verir (Chromium'da Arial). Bu satir olmadan aile ayari dugmeleri, secicileri
+   ve arama kutularini hic etkilemezdi — ustelik bugune kadar arayuzun geri
+   kalani Segoe UI iken dugme metinleri Arial'di, kimse fark etmemisti.
+   `#text-out` ve `#chart-info` gibi kendi ailesini yazanlar disarida kalir. */
+button, input, select, textarea { font-family: inherit; }
+
+#app { display: flex; height: 100%; }
+
+/* --- Sol panel ---------------------------------------------------------- */
+
+#side {
+  width: 296px; flex: 0 0 296px;
+  background: var(--panel); border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; min-height: 0;
+}
+
+/* ⚠ Sol panel basligi ile arac cubugu AYNI yukseklikte olmali — iki panelin
+ * alt sinirlari hizali gorunmeli. Olcu tek yerde durur ve ikisi de onu okur;
+ * ayri ayri yazilsaydi biri degisince oteki sessizce kayardi. */
+.side-head {
+  display: flex; align-items: center; gap: 8px;
+  height: var(--head-h); box-sizing: border-box; padding: 0 10px 0 8px;
+  border-bottom: 1px solid var(--line);
+}
+/* Sozcuk isareti ile dugmeler arasindaki esnek bosluk. */
+.head-gap { flex: 1 1 auto; min-width: 0; }
+
+/* Sozcuk isareti `JIMG` (`K-33`): uygulama menusunu acan dugmenin icerigi.
+ * Geometri `tools/make_icon.py wordmark()`ten gelir ve `index.html`e satir ici
+ * yazilir; RENK burada, temanin belirteclerinden. `J` belge rengi (`--json`),
+ * `IMG` cikti rengi (`--export`): JSON'dan goruntuye. Harfler kalin, yuvarlak
+ * uclu tek cizgidir — dolgu yok, yalnizca kontur. */
+.wordmark { display: block; height: 20px; width: auto; flex: none; }
+.wordmark path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.wm-j { stroke: var(--json); }
+.wm-img { stroke: var(--export); }
+
+/* Simge (altigen diyafram, kendi koyu zeminiyle) yalnizca Hakkinda
+ * penceresinde gorunur; `tools/make_icon.py` uretir ve `<img>` ile yuklenir.
+ * Olcu iki yerde yazili (HTML width/height + buradaki kural): HTML niteligi
+ * dosya gelmeden once yer ayirtir, CSS ise olcegi kesinlestirir. */
+.logo { flex: none; width: 32px; height: 32px; display: block; }
+.appbtn {
+  display: flex; align-items: center; padding: 6px; border: 0; border-radius: 8px;
+  background: transparent;
+}
+.appbtn:hover { background: var(--panel-2); }
+
+/* Agac aramasi SABIT: kendi seridinde, panel genisliginde. Acilir kutu yalnizca
+   arac cubugunda anlamli — orada ikonlarla yer paylasiyor, burada paylasmiyor. */
+.side-search { padding: 8px 10px; position: relative; }
+.side-search .search-ico {
+  position: absolute; left: 19px; top: 50%; transform: translateY(-50%);
+  width: 12px; height: 12px; color: var(--muted); pointer-events: none;
+}
+.side-search .search-ico path { fill: currentColor; }
+#tree-filter {
+  width: 100%; box-sizing: border-box;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+  color: var(--text); padding: 5px 9px 5px 28px; font-size: 12px;
+}
+#tree-filter:focus { outline: none; border-color: var(--accent); }
+
+/* --- Daraltilmis kenar cubugu -------------------------------------------- */
+/* Panel TUMDEN gizlenmez, dar seride iner: logo uygulama menusunun tek girisi
+   ve her zaman erisilebilir kalmali (bkz. js/shell.js `setSidebar`). */
+#side.collapsed { width: var(--rail-w); flex-basis: var(--rail-w); }
+#side.collapsed .side-head {
+  flex-direction: column; justify-content: flex-start;
+  height: auto; padding: 8px 0; gap: 6px;
+}
+/* ⚠ Gizlenecekler TEK TEK sayilmaz, gorunur kalacaklar SAYILIR: seride
+   sonradan eklenen her PANEL cocugu boylece varsayilan olarak gizli olur.
+   Secici DOGRUDAN cocuklari kapsar (`>`).
+
+   ⚠ Baslik icindekiler ayri yazilmak ZORUNDA: `.side-head` gorunur kaliyor
+   (logo serideki tek menu girisi), dolayisiyla icindeki marka metni `>`
+   kuralinin disinda kalir. Tek satirlik bir kural olarak birlestirildiginde
+   marka metni gizlenmeyi birakti ve 46 px'lik seridin disina tasti — gozle
+   yakalandi. */
+#side.collapsed > :not(.side-head):not(.rail-docs):not(.rail-pop) { display: none; }
+#side.collapsed .head-gap { display: none; }
+/* 11.1 — sozcuk isareti seritte KUCULMEZ: 20 px yukseklikte 58,5 px genislik,
+   64 px serit + 2 px dolgu ile sigar. Eskiden 13 px'e iniyordu ve kullanici
+   logonun kayboldugunu soyledi. Ayri bir simgeye donmez (`K-33`). */
+#side.collapsed .appbtn { padding: 4px 2px; }
+#side.collapsed { position: relative; }
+
+/* Serit belge listesi: agac gizlendiginde acik belgeleri gorunur tutar. */
+.rail-docs { display: none; }
+/* ⚠ **`overflow` VERILMEZ.** `overflow-y: auto` yazilmisti ve iki sey birden
+   bozuyordu: hover ipucu (`::after`) serit genisliginde KIRPILIYOR, dolayisiyla
+   belge adi hic gorunmuyordu; ustelik ipucu tasinca kaydirma cubugu doguyor ve
+   simgelerin altinda aciklanamayan bir artik olarak beliriyordu. Ikisi de ayni
+   kokten. Bedeli `AK-15`te kayitli: cok belge acilirsa serit tasar. */
+#side.collapsed .rail-docs {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 0; min-height: 0;
+}
+/* Acik belge: rengi `--btn-fg` ile kurulur (ikon dugmesi bloguna bakin).
+   Secili olan ZEMINLE isaretlenir — bostaki rengi zaten amber oldugu icin
+   "yalnizca renk degisir" kurali burada ayirt edici olmazdi.
+
+   ⚠ `--btn-fg` burada TEKRAR yazilir. `.on` genel kurali da (0,3,0) ve dosyada
+   daha altta; `.rail-doc` ile esit ozgullukte kalirsa kaynak sirasi kazanir ve
+   secili belge amber yerine MAVI olur. Bir varyantin `.on` hali kendi rengini
+   koruyacaksa iki sinifi birlikte yazmak sart. */
+.btn.icon.rail-doc.on {
+  background: var(--panel-2); border-color: var(--json); --btn-fg: var(--json);
+}
+/* 11.1 — belge KUTUCUGU: simge ustte, kisa ad altta (uzanti yok, sigmazsa uc
+   nokta); tam ad ipucunda. Ikon dugmesinin 26 px karesi burada genisler. */
+#side.collapsed .btn.icon.rail-doc {
+  width: 56px; height: auto; flex-direction: column; gap: 2px; padding: 5px 2px;
+}
+.rail-name {
+  font-size: 9.5px; line-height: 1.2; color: var(--muted); max-width: 52px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rail-doc.on .rail-name { color: var(--text); }
+/* 11.1 — kutucuga tiklayinca belgenin tablolari (ve varyantlari). Seridin
+   SAGINDA, kutucugun hizasinda acilir; `top` JS'ten gelir. */
+.menu.rail-pop {
+  left: calc(var(--rail-w) + 6px); right: auto; min-width: 210px; z-index: 40;
+}
+#side:not(.collapsed) .rail-pop { display: none; }
+.rail-pop .menu-item { align-items: baseline; }
+.rail-pop .menu-item .desc { margin-left: auto; padding-left: 12px; }
+.rail-pop .menu-item.sub { padding-left: 22px; font-style: italic; }
+.rail-pop .menu-item.on { background: var(--accent-dim); }
+/* Liste aciksa ipucu cikmaz: ikisi ayni yere, ust uste acilirdi. */
+#side:has(.rail-pop:not([hidden])) .rail-doc[data-tip]:hover::after { display: none; }
+/* Simgenin dolu sutunu daraltilmisken sagda durur: ayni dugme, iki durum. */
+#side.collapsed .side-toggle .rail { transform: scaleX(-1); }
+
+/* ⚠ Ipucu seritte SAGA acilir. Varsayilan `right: 0` ile sola aciliyor ve
+   46 px'lik seritte ekranin disina tasiyordu — "Paneli genişlet" gibi bir metin
+   seritten uc kat genis. */
+#side.collapsed .btn.icon[data-tip]:hover::after {
+  right: auto; left: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+}
+
+.tree { flex: 1; overflow: auto; padding: 6px 0 12px; min-height: 0; }
+.tree-empty { color: var(--muted); padding: 18px 14px; font-size: 12px; }
+
+.tnode {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 8px 4px 0; white-space: nowrap;
+  border-left: 2px solid transparent;
+}
+.tnode:hover { background: var(--panel-2); }
+.tnode.active { background: var(--accent-dim); border-left-color: var(--accent); }
+.tnode.in-path > .tname { color: var(--accent-fg); }
+
+.chev { width: 12px; flex: 0 0 12px; color: var(--muted); font-size: 10px; text-align: center; }
+.chev.spacer { visibility: hidden; }
+.tname { overflow: hidden; text-overflow: ellipsis; }
+.tdir > .tname { color: var(--text-2); }
+.tdoc > .tname { font-weight: 600; }
+.tds > .tname { color: var(--text); }
+.tvar > .tname { color: var(--text-2); font-style: italic; }
+
+.tsub, .tcount {
+  margin-left: auto; padding-left: 8px;
+  font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.tcount {
+  background: var(--panel-2); border-radius: 9px; padding: 0 7px; margin-left: auto;
+}
+.tclose { padding: 0 4px; color: var(--muted); font-size: 14px; line-height: 1; }
+.tclose:hover { color: var(--danger); }
+
+.side-msg {
+  border-top: 1px solid var(--line); padding: 7px 12px;
+  font-size: 11px; color: var(--muted); max-height: 84px; overflow-y: auto;
+}
+.side-msg:empty { display: none; }
+
+/* --- Ana alan ----------------------------------------------------------- */
+
+#main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* Tek satir: solda baslik, sagda uc oebek — arama · araclar · disa aktarim.
+   Serit HIC sarmaz; daralmayi yalnizca arama kutusu tasir ve o zaten bosta
+   ikon kadardir (bkz. `.search`). Baslik her genislikte okunur kalir. */
+#toolbar {
+  display: flex; flex-direction: column; align-items: stretch; justify-content: center;
+  gap: 8px; height: var(--head-h); box-sizing: border-box;
+  padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.tool-top { display: flex; align-items: center; gap: 14px; }
+
+.title-block { min-width: 140px; flex: 1 1 auto; }
+#ds-title {
+  margin: 0; font-size: 16px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ds-meta { font-size: 11.5px; color: var(--muted); margin-top: 2px;
+           overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tools { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+/* Serit HIC sarmaz: sarmaya izin verilseydi ikonlar alt satira dusup duzen
+   her genislikte baska turlu gorunurdu. Daralmayi yalnizca arama kutusu tasir. */
+.tools-main { flex: 0 1 auto; min-width: 0; flex-wrap: nowrap; }
+.tools-main .search { flex: 0 1 auto; min-width: 0; }
+.tools-main .btn { flex: 0 0 auto; }
+
+/* --- Acilir arama kutusu (arac cubugu) -----------------------------------
+   Bosta oteki ikonlardan ayirt edilemez: kenarlik ve zemin YOK, yalnizca
+   buyutec. Hover ile acilir, odaklaninca ACIK KILITLENIR, baska yere tiklanip
+   odak gidince kapanir.
+
+   ⚠ Uc kosulun ucu de CSS'te — JS yok. `:hover` fareyi, `:focus` tiklamayi,
+   `:not(:placeholder-shown)` ise DOLU kutuyu acik tutar. Ucuncusu sart:
+   kullanici bir filtre yazip baska yere tiklayinca kutu kapansaydi yazdigi
+   metin gorunmez olur, tablo suzulmus kalir ve sebebi ekranda hicbir yerde
+   yazmazdi.
+
+   ⚠ Bu kalip, eski "dar alanda buyutec DUGMESINE in" mekanizmasinin (`compact`
+   / `searching` / `#btn-search`) yerini aldi — kutu zaten bosta ikon kadar,
+   iki ayri daralma mantigi tutmanin anlami kalmadi. */
+.search { position: relative; display: flex; align-items: center; }
+/* ⚠ Buyutec SAGDA sabittir; kutu sola dogru acilir. Solda olsaydi acilirken
+   ikonun kendisi de sola kayar ve oteki ikonlarla hizasi bozulurdu. */
+.search .search-ico {
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  width: 13px; height: 13px; color: var(--muted); pointer-events: none;
+}
+.search .search-ico path { fill: currentColor; }
+/* ⚠ Dolgu, bosta genisligin TABANINI belirler: `box-sizing: border-box` altinda
+   kutu dolgu+kenarliktan dar olamaz. Bir kez 27+9+2 = 38 px dolgu yaziliyken
+   `--search-idle: 28px` sessizce yok sayildi. Bosta dolgu bu yuzden dardir ve
+   metne yer acan genis sag dolgu ancak ACILINCA gelir. */
+.search input {
+  width: var(--search-idle); box-sizing: border-box;
+  background: transparent; border: 1px solid transparent; border-radius: 6px;
+  color: var(--text); font-size: 12px; padding: 5px 6px;
+  transition: width .22s ease, padding .22s ease,
+              background-color .22s ease, border-color .22s ease;
+}
+/* Bosta yer tutucu metin gorunmez: 26 px'lik kutuda kirpilmis bir kelime
+   parcasi olarak sizardi. */
+.search input::placeholder { opacity: 0; transition: opacity .15s ease; }
+.search input:focus { outline: none; }
+
+.search:hover input,
+.search input:focus,
+.search input:not(:placeholder-shown) {
+  width: var(--search-open); padding: 5px 26px 5px 9px;
+  background: var(--panel-2); border-color: var(--line);
+}
+.search input:focus { border-color: var(--accent); }
+.search:hover input::placeholder,
+.search input:focus::placeholder { opacity: 1; }
+/* 9.29 — `@` ile acilan ad listesi: oteki menulerle ayni kutu, kutunun altinda
+   saga yasli. Secili satir klavyeyle gezilir (`.on`). */
+.menu.filter-suggest { min-width: 200px; max-height: 280px; padding: 4px; }
+.filter-suggest .menu-item { padding: 5px 9px; }
+.filter-suggest .menu-item.on { background: var(--panel); }
+/* 9.29 — aramada eslesen parca. Yazi rengi DEGISMEZ: hucrenin kendi rengi
+   (null, bool, sayi) anlam tasiyor. */
+mark.hit {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+  color: inherit; border-radius: 2px;
+}
+/* Kutu acilinca buyutec de arayuz rengine gecer — acik oldugu belli olsun. */
+.search:hover .search-ico,
+.search:focus-within .search-ico { color: var(--text); }
+
+.btn {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  padding: 6px 11px; border-radius: 6px; font-size: 12.5px;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .4; }
+.btn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-fg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.1); }
+
+/* Gorunum kontrolleri ile cikti eylemlerini ayiran sinir. */
+.tool-sep {
+  width: 1px; height: 24px; margin: 0 4px;
+  background: var(--line); flex: 0 0 1px;
+}
+/* Renk kimlikleri `--btn-fg` ile kurulur; bildirimleri ikon dugmesi blogunda,
+   `.btn.icon` kuralinin yaninda durur. */
+
+.menu-wrap { position: relative; }
+.menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 20;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px; min-width: 230px; max-height: 60vh; overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+.menu label {
+  display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+  border-radius: 4px; font-size: 12.5px;
+}
+.menu label:hover { background: var(--panel); }
+/* Uygulama menusu panelin SOL kenarindaki logodan aciliyor; varsayilan
+   `right: 0` onu ekranin disina tasirdi. */
+.menu.app-menu { left: 0; right: auto; }
+.menu-group {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .7px;
+  color: var(--muted); padding: 8px 8px 3px;
+}
+/* Sutun grubu adlari menunun ALT basligidir; ana bolum basliklariyla
+   (Gruplar / Sütunlar) karismasin diye girintili ve soluk. */
+.menu-group.sub { padding-left: 18px; opacity: .65; font-size: 9.5px; }
+
+/* Uyarilar bir kez okunur, sonra cekilir (js/table.js NOTES_MS). Yer kaplamamalari
+   icin yukseklikleri de sifira iner, yoksa tablo asagida asili kalir. */
+.notes {
+  padding: 0 16px; overflow: hidden;
+  transition: opacity .4s ease, max-height .4s ease;
+  max-height: 240px; opacity: 1;
+}
+.notes.gone { max-height: 0; opacity: 0; }
+.note.auto-hide {
+  background: var(--note-info-bg); border-left-color: var(--accent); color: var(--accent-fg);
+}
+/* Sema varyanti bir uyari degil BULGUDUR: sari degil yesil. */
+.note.variant {
+  background: var(--note-ok-bg); border-left-color: var(--export); color: var(--note-ok-fg);
+}
+.note {
+  margin: 8px 0 0; padding: 7px 10px; font-size: 11.5px;
+  background: var(--note-warn-bg); border-left: 3px solid var(--warn);
+  border-radius: 0 4px 4px 0; color: var(--note-warn-fg);
+}
+
+/* --- Tablo -------------------------------------------------------------- */
+
+/* Soldaki 27 px kose dugmesine ayrilmistir (`.tbl-corner`): dugme tablonun
+   ustune binmesin, ilk sutunun basligi gorunur kalsin. */
+.table-wrap {
+  flex: 1; overflow: auto; margin: 12px 16px 0 43px; position: relative;
+}
+.placeholder { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* Genislik JS'ten piksel olarak gelir (js/table.js `renderHead`); `table-layout:
+   fixed` ancak o zaman colgroup olculerini birebir uygular. */
+table { border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+
+thead th {
+  position: sticky; background: var(--panel-2);
+  border-bottom: 1px solid var(--line); border-right: 1px solid var(--line);
+  padding: 0; text-align: left; font-weight: 600; font-size: var(--font-size);
+  user-select: none; white-space: nowrap;
+}
+thead tr:first-child th { top: 0; z-index: 6; }
+thead tr.group-row + tr th { top: 23px; z-index: 5; }
+thead tr:only-child th { top: 0; }
+
+.group-row th {
+  height: var(--group-h); padding: 0 8px; font-size: var(--small-size); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px; text-align: center;
+  background: var(--group-row); color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.group-row th.g-0 { color: var(--g0); box-shadow: inset 0 -2px 0 var(--g0); }
+.group-row th.g-1 { color: var(--g1); box-shadow: inset 0 -2px 0 var(--g1); }
+.group-row th.g-2 { color: var(--g2); box-shadow: inset 0 -2px 0 var(--g2); }
+.group-row th.g-3 { color: var(--g3); box-shadow: inset 0 -2px 0 var(--g3); }
+.group-row th.g-4 { color: var(--g4); box-shadow: inset 0 -2px 0 var(--g4); }
+.group-row th.g-5 { color: var(--g5); box-shadow: inset 0 -2px 0 var(--g5); }
+.group-row th.g-6 { color: var(--g6); box-shadow: inset 0 -2px 0 var(--g6); }
+
+thead th .th-inner {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 10px; overflow: hidden;
+}
+thead th.dragging { opacity: .4; }
+thead th.drop-left  { box-shadow: inset 2px 0 0 var(--accent); }
+thead th.drop-right { box-shadow: inset -2px 0 0 var(--accent); }
+.th-label { overflow: hidden; text-overflow: ellipsis; }
+.th-badge { font-size: var(--small-size); color: var(--muted); font-weight: 500; }
+.th-sparse { color: var(--warn); }
+.th-sort { color: var(--accent); font-size: 10px; }
+
+.resizer {
+  position: absolute; top: 0; right: 0; width: 6px; height: 100%;
+  z-index: 7;
+}
+.resizer:hover { background: var(--accent); }
+
+/* Tablonun sol ust kose DUGMESI — tiklayinca sutun genislikleri sifirlanir.
+   Tablonun disinda durur (bkz. index.html `#table-area`), boylece her tabloda
+   bulunur ve PNG ciktisina fazladan sutun eklemez. Yuksekligi baslik satirina
+   gore JS'ten gelir. */
+#table-area { flex: 1; min-height: 0; position: relative; display: flex; }
+.tbl-corner {
+  position: absolute; top: 12px; left: 16px; z-index: 6;
+  width: 27px; min-height: 26px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel-2); color: var(--muted);
+  border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.tbl-corner:hover { background: var(--accent-dim); color: var(--accent-fg); }
+.tbl-corner[hidden] { display: none; }
+.tbl-corner .ico { width: 12px; height: 12px; }
+.tbl-corner .ico path { fill: currentColor; }
+
+tbody td {
+  border-bottom: 1px solid var(--line); border-right: 1px solid var(--line);
+  /* Ust/alt dolgu satir YOGUNLUGUNDAN gelir (9.19.1, `theme.CELL_PAD_Y`);
+     cizim ayni sayidan satir yuksekligini turetir. */
+  padding: var(--cell-pad-y) 10px; vertical-align: top; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+tbody tr.row:hover { background: var(--row-hover); }
+
+/* Metin grubu hucrelerinde metin alt satirlara yayilir (js/table.js `buildTd`).
+   Kalan sutunlar tek satir kalir: kimlik ve sayilar bolununce tablo dagilir.
+   Cok uzun metin sutunlari zaten varsayilan olarak gizli (app.py
+   `_long_text_columns`), acilirsa bu bicimle okunur. */
+td.cell-wrap {
+  white-space: normal; overflow-wrap: anywhere; text-overflow: clip;
+  line-height: 1.45;
+}
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.field-name { font-weight: 600; background: var(--panel-2); }
+/* ⚠ Duz ton ve tarama BIRLIKTE. `--missing` cizimdeki karsiligiyla ayni degeri
+   tasir (`img_table._scene_cell`); tarama yalnizca ekranda var, Pillow'da capraz
+   cizgi cizmek hucre basina ayri bir gecis demek. Once yalnizca tarama vardi ve
+   `.03` opaklikta neredeyse gorunmuyordu: eksik hucre PNG'de belirgin, ekranda
+   fark edilmezdi — "cikti ekranla birebir" degismezinin sessiz istisnasiydi. */
+td.missing {
+  background: repeating-linear-gradient(45deg, transparent, transparent 4px,
+              var(--hatch) 4px, var(--hatch) 8px), var(--missing);
+}
+.cell-null { color: var(--muted); }
+.cell-bool { color: var(--bool); }
+
+tr.group-sep td {
+  background: var(--group-row); color: var(--muted); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px; padding: 5px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.expander {
+  width: 28px; text-align: center; color: var(--muted);
+  padding: 6px 0;
+}
+.expander:hover { color: var(--accent); }
+th.expander-h { width: 28px; }
+
+.badge {
+  display: inline-block; background: var(--accent-dim); color: var(--text-2);
+  border-radius: 10px; padding: 1px 8px; font-size: 11px;
+}
+
+tr.detail > td { background: var(--row-detail); padding: 10px 14px; white-space: normal; }
+.sub-block { margin-bottom: 12px; }
+.sub-block:last-child { margin-bottom: 0; }
+.sub-title { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .6px; }
+table.sub { table-layout: auto; width: auto; max-width: 100%; }
+table.sub th, table.sub td {
+  border: 1px solid var(--line); padding: 4px 8px; font-size: 12px;
+  white-space: normal; word-break: break-word; max-width: 460px;
+}
+table.sub th { background: var(--panel-2); position: static; }
+
+.status {
+  border-top: 1px solid var(--line); padding: 6px 16px;
+  font-size: 11.5px; color: var(--muted); background: var(--panel);
+}
+.status.error { color: var(--danger); }
+/* Cok dar alanda (js/main.js NARROW_W) once basligin altindaki bilgi satiri, sonra
+   durum cubugu gizlenir: ikisi de sayilari tekrarlar ve sikisinca ust uste
+   binerdi. Veri kumesi adi (#ds-title) her zaman kalir. */
+#main.narrow .ds-meta,
+#main.narrow .status { display: none; }
+
+/* --- Duzenleme kipi (10.5) ---------------------------------------------- */
+/* Kaydedilmemis degisiklik: hucrenin SOL kenarinda cizgi. Kipten bagimsiz —
+   kip kapatilinca degisiklik kaybolmuyor. Zemin degil cizgi: hucre zemini
+   secim, hover ve null/bool renkleriyle zaten konusuyor. */
+tbody td.edited { box-shadow: inset 3px 0 0 var(--accent); }
+/* 10.7.2 — adi degisen sutun: baslikta ayni sol cizgi. ⚠ `th`ye degil ic
+   kutuya: `th`nin `box-shadow`u surukle-birak gostergesi (`drop-left/right`)
+   ve bu kural sonra geldigi icin o gostergeyi gizlerdi. */
+thead th.edited .th-inner { box-shadow: inset 3px 0 0 var(--accent); }
+#main.edit-on thead th .th-label { cursor: text; }
+#main.edit-on thead th:focus { outline: none; box-shadow: inset 0 -2px 0 var(--accent); }
+/* 10.6 — tablonun ADI kaydedilmeden degisti: hucreyle ayni dil, sol cizgi.
+   ⚠ Metin KAYMAMALI (hucre duzenleyicisindeki kaymayla ayni ders): kenarlik +
+   ic bosluk kadar NEGATIF dis bosluk verilir, kutu sola genisler, yazi yerinde
+   kalir. `::before` ile disari konan cizgi olmazdi: ikisi de metni kirpmak icin
+   `overflow: hidden` tasiyor ve cizgiyi de kirpiyor. */
+#ds-title.edited { border-left: 3px solid var(--accent); padding-left: 5px; margin-left: -8px; }
+.tname.edited { border-left: 2px solid var(--accent); padding-left: 4px; margin-left: -6px; }
+/* Agacta belge adinin yanindaki nokta. */
+.tdirty { color: var(--accent); margin-left: 4px; }
+/* Soru penceresi: dar ve metin merkezli degil — ileti dosya adi tasiyabilir. */
+.ask-dlg { width: min(420px, 100%); }
+.ask-msg { margin: 0; line-height: 1.5; }
+
+/* Kip KAPALIYKEN tabloya tek bir kural bile uygulanmaz: butun secicilerin
+   onunde `#main.edit-on` var. Acikken duzenlenebilir hucre elle tutulur
+   gorunur (imlec + hover cercevesi), duzenlenemeyen soluklasir ve ipucunda
+   nedenini soyler (`data-tip`, neden Python'dan gelir). */
+/* 11.2 — gorunum kipinde secili hucre (Ctrl+C, sag tik): duzenleme kipindeki
+   odak isaretiyle AYNI cerceve — yeni bir gorsel dil degil. */
+tbody td:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.menu.cell-menu { position: fixed; right: auto; min-width: 200px; z-index: 60; }
+#main.edit-on tbody td.editable { cursor: cell; }
+#main.edit-on tbody td.editable:hover {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+#main.edit-on tbody td.editable:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+#main.edit-on tbody td.no-edit { opacity: .55; }
+
+/* ⚠ Kutu hucreyi BUYUTMEMELI ve metni KAYDIRMAMALI. Tabloda kutu hucrenin
+   USTUNE mutlak konumlanir (`td > .cell-edit`), hucrenin icerigi yerinde kalir
+   ve yalnizca gorunmez olur — satirin olcusunu hep icerik belirler. Ic bosluk
+   JS'ten, hucrenin hesaplanan degerinden gelir (js/edit.js `beginEdit`).
+   Ilk yazimda icerik kutuyla degistiriliyordu ve satir uzayip metin kayiyordu. */
+.cell-edit {
+  width: 100%; box-sizing: border-box;
+  padding: 0; margin: 0; border: 0; outline: none;
+  background: var(--panel-2); color: var(--text);
+  font: inherit; line-height: inherit;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+tbody td.editing { position: relative; color: transparent; }
+tbody td.editing > .cell-edit { position: absolute; inset: 0; height: 100%; }
+/* 10.6 — tablo adi: baslikta ve agacta ayni kutu. Baslik kipte odaklanabilir. */
+.name-edit { min-width: 8ch; }
+#main.edit-on #ds-title { cursor: text; }
+#main.edit-on #ds-title:focus { outline: none; box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* --- Metin paneli ------------------------------------------------------- */
+
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--overlay);
+  display: flex; align-items: center; justify-content: center; padding: 32px;
+}
+.overlay[hidden] { display: none; }
+/* Kucuk yukseklikte (9.14.1) bosluk daralir: 470 px'lik pencerede 64 px bos
+   kenar, pencerenin yedide biriydi. */
+@media (max-height: 600px) { .overlay { padding: 12px; } }
+
+.tpanel {
+  position: relative;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  width: min(1180px, 100%); height: min(88vh, 100%);
+  min-width: 520px; min-height: 320px;
+  display: flex; flex-direction: column;
+  /* overflow:hidden DEGIL — altbilgideki acilir menuyu kirpiyordu.
+     Kaydirma gerektiren alanlar kendi overflow'unu zaten yonetiyor. */
+  box-shadow: var(--shadow-lg);
+}
+/* Ayarlar penceresi: ayni kabuk, kucuk olcu. Yukseklik ICERIGE gore — sabit
+   `88vh` verilseydi tek satirlik bir form kocaman bos bir kutuda dururdu.
+   ⚠ Ama UST SINIRLI (9.14.1): sinir yokken kaplama tasan paneli ortaliyor ve
+   iki ucundan kesiyordu — 1366x700'de Ayarlar'in basligi da `Kapat`i da
+   ekran disindaydi. Baslik ve altbilgi sabit kalir, yalnizca govde kayar.
+   Sinir kaplamanin ic kutusudur; `check_web` bunu denetler. */
+.tpanel.dlg {
+  width: min(460px, 100%); height: auto; max-height: 100%;
+  min-width: 320px; min-height: 0;
+}
+.tpanel.dlg > .tpanel-head, .tpanel.dlg > .tpanel-foot { flex: none; }
+.tpanel.dlg .tpanel-head b { flex: 1; font-size: 13.5px; }
+/* Kapatma dugmesi olmayan baslik ORTALI. `.tpanel-head` uc pencerede ortak, o
+   yuzden ayrim sinifta durur — Hakkinda ve disa aktarma panelinde `✕` hala
+   akista ve orada ortalamak basligi ona gore kaydirirdi. */
+.tpanel-head.mid b { text-align: center; }
+/* Altbilgide iki dugme: sifirlama solda, kapatma sagda. Aradaki bosluk
+   `margin-left: auto` ile acilir ki dugme sayisi degisirse hiza bozulmasin. */
+.dlg-actions .btn:last-child { margin-left: auto; }
+.dlg-body {
+  padding: 18px 16px; display: flex; flex-direction: column; gap: 14px;
+  overflow-y: auto; min-height: 0;
+}
+/* Kayan esnek kapta cocuklar kuculmez: aksi halde satirlar sikisip ust uste
+   biner, kaydirma cubugu hic cikmaz. */
+.dlg-body > * { flex-shrink: 0; }
+.dlg-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; font-size: 13px;
+}
+/* Anahtar kutusu seciciyle AYNI bildirimden beslenir: ikinci bir kopya
+   yazmak, iki kutunun zamanla ayrisan kenarlik/dolgu almasi demekti. */
+.dlg-row select, .dlg-row .key-input, .set-row select, .set-row .key-input {
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--field-line, var(--line));
+  border-radius: 6px; padding: 5px 9px; font-size: 12.5px; min-width: 190px;
+}
+/* --- Ayarlar: solda sekmeler, sagda satirlar (9.14.2) ----------------------
+   ⚠ Secici UC sinifli: `.tpanel.dlg`nin `height: auto`su iki sinifli ve
+   `.settings-dlg` tek basina ona yenilirdi — pencere icerige gore uzar,
+   sekme degisince zipalardi. Yukseklik SABIT ve kaplamayla sinirli. */
+.tpanel.dlg.settings-dlg { width: min(760px, 100%); height: min(600px, 100%); }
+.set-wrap { flex: 1 1 auto; min-height: 0; display: flex; }
+.set-nav {
+  flex: 0 0 180px; display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 8px; border-right: 1px solid var(--line); background: var(--bg);
+}
+.set-tab {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 6px;
+  background: none; color: var(--muted); font: inherit; font-size: 13px; text-align: left;
+}
+.set-tab .ico { width: 16px; height: 16px; flex: 0 0 16px; }
+.set-tab .ico path { fill: currentColor; }
+.set-tab:hover { color: var(--text); background: var(--row-hover); }
+.set-tab.on { color: var(--text); background: var(--accent-dim); box-shadow: inset 3px 0 0 var(--accent); }
+.set-panes { flex: 1 1 auto; }
+.set-pane { display: flex; flex-direction: column; gap: 8px; }
+.set-pane[hidden] { display: none; }
+.set-title { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+/* Satir (9.17): ustte ad ile denetim AYNI HIZADA, aciklama altta ve kartin
+   tum genisliginde. Kart zemini satirlari ayirir; ayrac cizgisi yerine zemin,
+   cunku aciklama uzunlugu satirdan satira degisiyor.
+
+   ⚠ Izgara, esnek kutu DEGIL: ad + aciklama tek sutunda dururken denetim o
+   obegin ORTASINA hizalaniyordu — aciklama iki satira tasinca secici adin
+   hizasindan dusuyordu. `.set-text` kutu uretmez (`display: contents`); uc
+   parca izgaraya ACIKCA yerlesir, DOM sirasi (ad, aciklama, denetim) korunur. */
+.set-row, .set-block {
+  padding: 11px 14px; border-radius: 8px; background: var(--panel-2); font-size: 13px;
+}
+.set-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; column-gap: 16px; row-gap: 7px;
+}
+.set-row > .set-text { display: contents; }
+.set-row .lbl-txt { grid-area: 1 / 1; }
+.set-row > select, .set-row > .btn, .set-row > .key-input { grid-area: 1 / 2; }
+/* Metin kutulu satir (9.21): kutu secicilerle ayni genislikte baslar. */
+.set-row > .key-input { width: 260px; }
+.set-row .set-desc { grid-area: 2 / 1 / 3 / -1; }
+/* Blok: ad + aciklama ustte, altinda satirlar; gruplar arasinda bosluk. */
+.set-block { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+.set-block[hidden] { display: none; }
+.set-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.set-text > .lbl-txt { font-weight: 600; }
+/* Kart zemini `--panel-2`; icindeki kutu ayni zeminde kaybolurdu. */
+.set-row select, .set-row .key-input, .set-block .key-input { background: var(--panel); }
+/* Blogun sonundaki eylem: sola yasli, kendi olcusunde. */
+.set-actions { display: flex; }
+/* Aciklama italik: ikincil oldugu punto ve renkle birlikte bicimle de okunur.
+   Adla AYNI sol hatta baslar — girinti yok (kullanici karari; girintiliyken
+   alttaki satir aciklamalariyla iki ayri hat olusuyordu).
+
+   ⚠ Ayarlar penceresindeki HER aciklama ayni bicimi tasir: satirin kendi
+   aciklamasi (`.set-desc`) ve bloklarin icinde kopruden kurulanlar
+   (`.dlg-sub`: model listesinin durumu, anahtar deposu uyarisi). Ikinci secici
+   `.dlg-sub`un tek sinifli kuralini (12 px, duz) ozgullukle yener. */
+.set-desc, .set-pane .dlg-sub {
+  font-size: 11.5px; font-style: italic; color: var(--muted); line-height: 1.45;
+}
+/* ⚠ Izgara, esnek kutu DEGIL: silme dugmesi yalnizca KAYITLI satirda
+   kuruluyor ve esnek kutuda o satirin girdisi 24 px dar kaliyordu — iki
+   satirin kutulari gozle gorulur bicimde ayrisiyordu (olculdu: 88 / 118 px).
+   Izgarada dugme sutunu dugme olmasa da ayrilir, kutular ayni genislikte
+   durur. `24px` `.ibtn` olcusuyle ESLESIR.
+
+   ⚠ **Dugme sutunu SOLDA.** Sagda dururken anahtar kutusunun sag kenari,
+   ustundeki saglayici secicisinden 30 px iceride kaliyordu (24 + 6) ve iki
+   form ogesi ayni pencerede farkli hatlarda bitiyordu. Sutunlarin yeri
+   degisti; yerlesim acikca yazilir (`grid-column`), otomatik yerlesim DOM
+   sirasini izler ve kutuyu yine ilk sutuna koyardi. DOM sirasi bilerek
+   korunuyor: sekme once kutuya, sonra silme dugmesine ugramali. */
+.key-field { display: grid; grid-template-columns: 24px 1fr; align-items: center; gap: 6px; }
+.key-field .ibtn { grid-area: 1 / 1; }
+.key-input { min-width: 0; grid-area: 1 / 2; }
+#set-keys-rows { display: flex; flex-direction: column; gap: 12px; }
+/* Model listesi (9.5.5.2; Ayarlar'in Agent sekmesinde). Satir + aciklama tek
+   obek, anahtar satirlariyla ayni kalip — aradaki bosluk satirlar arasindakinden
+   KUCUK. */
+#mdl-rows { display: flex; flex-direction: column; gap: 10px; }
+/* ⚠ Kullanicinin ekledigi kimlik ESARALIKLI yazilir: `gpt-5.6-sol` ile
+   `gpt-5.6-so1` orantili yazi tipinde ayirt edilemiyor ve yanlis bir kimlik
+   ancak istek dustugunde fark edilirdi. Yerlesik modelin etiketi cevrilmis bir
+   AD, o orantili kalir. */
+.mdl-id { font: 12px/1.4 var(--mono); }
+/* Ekleme satiri: kutu buyur, dugme kendi olcusunde kalir. `.dlg-row`un
+   `space-between`i burada yetmiyor — kutu ile dugme arasinda bosluk degil,
+   kutunun BUYUMESI gerekiyor. */
+.mdl-add { gap: 8px; }
+.mdl-add .key-input { flex: 1; min-width: 0; }
+/* Saglayici notlari basligin altinda tek obek (9.18): her satir bir grup.
+   Ad duz ve bir ton acik — italik metnin icinde hangi saglayici oldugu
+   gozle bulunabilsin. Not yoksa obek yer tutmaz. */
+.key-info { display: flex; flex-direction: column; gap: 2px; }
+.key-info:empty { display: none; }
+.key-who { font-style: normal; font-weight: 600; color: var(--text-2); }
+.dlg-path {
+  flex: 1; min-width: 0; font-size: 11px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Hakkinda penceresi */
+.about-top { display: flex; align-items: center; gap: 12px; }
+.about-top b { font-size: 15px; }
+.dlg-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.dlg-note { margin: 0; font-size: 12.5px; color: var(--text); line-height: 1.5; }
+/* Ad–deger listesi: etiket solda dar, deger sagda genis. */
+.dlg-kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12px; }
+.dlg-kv .k { color: var(--muted); white-space: nowrap; }
+.dlg-kv .v { color: var(--text); }
+
+.tpanel-head, .tpanel-foot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: var(--panel-2);
+}
+/* Kapatma dugmesi AKISTAN CIKARILIR: akista kalsaydi sekme oebegi onun
+   genisligi kadar sola kayar, "ortali" gorunmezdi. */
+.tpanel-head {
+  border-bottom: 1px solid var(--line); border-radius: 9px 9px 0 0;
+  position: relative;
+}
+.tpanel-head .close-btn {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+}
+.tpanel-foot {
+  border-top: 1px solid var(--line); border-radius: 0 0 9px 9px;
+  position: relative; z-index: 40;      /* acilir menu icerigin ustunde kalsin */
+}
+
+.close-btn {
+  background: none; border: 1px solid transparent; color: var(--danger);
+  font-size: 12px; line-height: 1; padding: 4px 7px; border-radius: 5px;
+}
+.close-btn:hover { background: var(--danger-bg); border-color: var(--danger); }
+
+/* Panelin sag alt kosesinden yeniden boyutlandirma */
+.resize-grip {
+  position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px;
+  z-index: 45;
+  touch-action: none;   /* pointer capture icin: tarayici kaydirma devralmasin */
+  background:
+    linear-gradient(135deg, transparent 0 45%, var(--muted) 45% 55%, transparent 55% 100%),
+    linear-gradient(135deg, transparent 0 70%, var(--muted) 70% 80%, transparent 80% 100%);
+  opacity: .55;
+}
+.resize-grip:hover { opacity: 1; }
+
+/* Yakinlastirma seridi — Word'deki gibi altta */
+.zoombar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px; background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+.zoombar[hidden] { display: none; }
+.zbtn {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  width: 24px; height: 24px; border-radius: 5px;
+  font-size: 14px; line-height: 1;
+}
+.zbtn:hover { border-color: var(--accent); }
+#zoom-range { width: 190px; accent-color: var(--accent); }
+.zval {
+  font-size: 11.5px; color: var(--muted); min-width: 46px;
+  font-variant-numeric: tabular-nums;
+}
+.btn.zfit { padding: 3px 9px; font-size: 11.5px; }
+
+/* Ust duzey sekmeler IKON: kenarlik yok, ad hover'da (`data-tip`), secili olan
+   hem renklenir hem BUYUR — hangi sekmede oldugun tek bakista anlasilsin. */
+/* Win11 gorev cubugu gibi ORTALI. */
+.tabs { display: flex; gap: 2px; flex: 1; align-items: center; justify-content: center; }
+.tab {
+  position: relative; background: transparent; color: var(--muted); border: 0;
+  padding: 8px 12px; line-height: 0;
+  border-bottom: 2px solid transparent;
+}
+.tab .ico { width: 18px; height: 18px; transition: width .12s, height .12s; }
+.tab .ico path { fill: currentColor; }
+.tab:hover:not(:disabled) { color: var(--text); }
+.tab.on { color: var(--export); border-bottom-color: var(--export); }
+.tab.on .ico { width: 22px; height: 22px; }
+.tab:disabled { opacity: .3; }
+
+/* Gorseller ayri: belgenin KENDI icerigi, uretilmis bir cikti degil. */
+.tab-sep { width: 1px; height: 20px; margin: 0 8px; background: var(--line); }
+
+.tab[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 3px 9px; font-size: 11.5px; font-weight: 400; color: var(--text);
+  white-space: nowrap; pointer-events: none; z-index: 90; line-height: 1.4;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Alt sekmeler de ust seritle ayni hizada: ORTALI. Aciklama satiri hemen
+   altlarinda, biraz nefes payiyla. */
+.tpanel-sub {
+  padding: 10px 16px; border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  display: flex; flex-direction: column; align-items: center;
+}
+/* `display` acikca verildigi icin `hidden` ozniteligi tek basina yetmez —
+   yoksa TUM alt sekme cubuklari ayni anda gorunur. */
+.tpanel-sub[hidden] { display: none; }
+
+.seg { display: flex; gap: 0; }
+/* Ust sekmeler ikona dondugu icin alt sekmeler onlarin golgesinde kalmali:
+   olculer 0.8 katina indirildi. */
+.segbtn {
+  background: var(--panel); color: var(--muted); border: 1px solid var(--line);
+  padding: 5px 9px; font-size: 10px; white-space: nowrap;
+  border-right-width: 0;
+}
+.segbtn:first-child { border-radius: 6px 0 0 6px; }
+.segbtn:last-child { border-radius: 0 6px 6px 0; border-right-width: 1px; }
+.segbtn:hover { color: var(--text); }
+.segbtn.on { background: var(--accent-dim); color: var(--accent-fg); border-color: var(--accent); }
+
+#text-out {
+  flex: 1; margin: 0; border: 0; resize: none;
+  background: var(--bg); color: var(--text);
+  font: 12px/1.55 var(--mono);
+  padding: 14px 16px; white-space: pre; overflow: auto;
+}
+#text-out:focus { outline: none; }
+#text-out[hidden] { display: none; }
+
+.sub-note {
+  font-size: 11.5px; color: var(--muted); display: block;
+  margin-top: 3px; text-align: center;
+}
+
+/* --- Ikon dugmeleri -------------------------------------------------------
+   Agent seridindeki `.ibtn` kalibini izler: zemin YALNIZCA hover'da gelir.
+   Once ucu de surekli dolu zeminliydi ve arac cubugu renkli bloklar dizisi
+   gibi gorunuyordu; renk kimligi (mavi/yesil/mor) korundu ama artik ikonun
+   KENDISINDE tasiniyor, zeminde degil.
+
+   ⚠ **Renk `--btn-fg` ile dagitilir, `color:` ELLE YAZILMAZ.** Kalip imlec
+   ailesindekiyle ayni (`--cur`, bkz. dosyanin sonu): varyant yalnizca
+   degiskeni kurar, `color` bildirimi tek yerde durur. Once her varyant
+   `color`u kendi yaziyordu ve `.btn.icon` ile ESIT ozgullukte (0,2,0)
+   kaldiklari icin kaynak sirasina yeniliyorlardi — `.btn.export`,
+   `.rail-doc` ve `.btn.on` uc ayri kez griye dondu. Degisken bildirimleri
+   `color` bildirimiyle yarismadigi icin ozgulluk artik onemsiz; her varyant
+   TEK satir ve hover kopyalarina gerek yok.
+
+   Etkin durum (`.on`) zemin ya da kenarlik EKLEMEZ: zemin hover'in isareti,
+   etkin durum onu taklit ederse iki anlam ayni goruntuyu paylasir. */
+.btn.icon {
+  background: transparent; border: 1px solid transparent;
+  color: var(--btn-fg, var(--muted));
+  width: 26px; height: 26px; min-width: 0; padding: 0; border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; line-height: 1;
+}
+.btn.icon:hover:not(:disabled) {
+  background: var(--panel-2); border-color: var(--line);
+  color: var(--btn-fg, var(--text));
+}
+
+/* Renk kimlikleri ve etkin durumlar — her biri tek satir. Transpoze TURUNCU,
+   filtre MAVI; ikisi ayni anda etkin olabilir. */
+#btn-open-files { --btn-fg: var(--accent); }
+.btn.icon.doc { --btn-fg: var(--json); }
+.btn.icon.export { --btn-fg: var(--export); }
+.btn.icon.claude { --btn-fg: var(--agent); }
+/* 9.19.4 — Agent ayardan kapaliyken dugmesi yer tutmaz (`main.applyShell`
+   kok ogeye yazar). Gizleme GORUNUMDUR; sinir koprudedir (`agent_ask`). */
+:root[data-agent="off"] #btn-claude { display: none; }
+.btn.icon.rail-doc { --btn-fg: var(--json); }
+.btn.icon.on { --btn-fg: var(--accent); }
+.btn.icon.warm.on { --btn-fg: var(--orange); }
+
+/* Satir ici SVG ikon: rengini dugmeden alir, boylece hover ve `.on` durumunda
+   metin ikonlarla ayni davranir. */
+.btn.icon .ico { width: 14px; height: 14px; vertical-align: -2px; }
+.btn.icon .ico path { fill: currentColor; }
+/* ⚠ Parantez simgesi DOLGU degil CIZGI: yukaridaki kural `fill: currentColor`
+   dayattigi icin burada acikca geri alinir — `fill="none"` niteligi CSS'e
+   yenilir. */
+.btn.icon .brace-ico path {
+  fill: none; stroke: currentColor; stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Adi uzerine gelince cikan ipucu. `title` yerine bunu kullaniyoruz: aninda
+   gorunur ve arayuzle ayni renkte. Ikon dugmelerde ve tablo kosesinde. */
+.btn.icon[data-tip], .tbl-corner[data-tip] { position: absolute; }
+.btn.icon[data-tip] { position: relative; }
+.btn.icon[data-tip]:hover::after,
+.tbl-corner[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 90;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 4px 9px; font-size: 11.5px; font-weight: 400; color: var(--text);
+  white-space: nowrap; pointer-events: none;
+  box-shadow: var(--shadow-sm);
+}
+/* Kose tablonun solunda; ipucu sagina acilir, yoksa ana alanin disina tasar. */
+.tbl-corner[data-tip]:hover::after { right: auto; left: 0; }
+
+/* Kaydet — bicim secimli acilir menu */
+.caret { font-size: 9px; opacity: .8; margin-left: 2px; }
+/* Kaydet menusu YUKARI acilir: altbilgi panelin dibinde, asagi acilsa
+   pencerenin disina taşardi. */
+.menu.save-menu {
+  min-width: 240px; top: auto; bottom: calc(100% + 6px); z-index: 70;
+}
+.menu-item {
+  display: flex; align-items: baseline; gap: 8px; width: 100%;
+  background: none; border: 0; color: var(--text);
+  padding: 7px 9px; border-radius: 5px; font-size: 12.5px; text-align: left;
+}
+.menu-item:hover { background: var(--panel); }
+.menu-item .ext {
+  color: var(--export); font-weight: 600; font-size: 11px;
+  min-width: 52px; font-variant-numeric: tabular-nums;
+}
+/* Sifirlama menusunde etiket bir bicim adi degil, cumle: yan yana sigmaz,
+   aciklama alt satira gecer. */
+.menu-item .ext.wide { color: var(--text); font-size: 12px; min-width: 0; }
+#reset-menu { min-width: 250px; }
+/* Aciklamali menuler: etiket ustte, aciklama altta. Yan yana dizilseydi
+   etiket sutunu daralip "Dosya Aç" iki satira sarardi. Uygulama menusunde
+   aciklama YOK, o yuzden orada tek satir kalir. */
+#reset-menu .menu-item { flex-direction: column; align-items: flex-start; gap: 2px; }
+/* Kisayol satirin sagina yaslanir; menu kisayolun ogrenildigi yerdir. */
+#app-menu .menu-item { justify-content: space-between; }
+.menu-key { color: var(--muted); font-size: 11px; margin-left: 14px; }
+/* Basliksiz bolumun ayraci: grup basligi bosluk uretiyor, ayrac onun yerini
+   tutar (bkz. js/shell.js `buildAppMenu`). */
+.menu-sep { height: 1px; background: var(--line); margin: 6px 8px; }
+.menu-item .desc { color: var(--muted); font-size: 11px; }
+
+/* Etkilesimli vektor grafik */
+/* ⚠ **`safe center`, duz `center` DEGIL.** Ortalanmis bir flex ogesi
+   kapsayicidan genis oldugunda tasmanin YARISI kaydirma baslangicinin soluna
+   duser ve oraya ulasmanin yolu yoktur: `scrollLeft` negatif olamaz. Yakinlastirilmis
+   cizimde solda kalan sutunlar kalici olarak gorunmez kaliyordu (olculdu: %400'de
+   49 px, buyuk cizimde cok daha fazla). `safe`, icerik tasar tasmaz hizalamayi
+   `start`a dusurur — kucuk cizim yine ortali durur, buyugunun tamami gezilebilir.
+
+   Ayni tuzak dikeyde YOK: `align-items` zaten `flex-start`. */
+#svg-wrap {
+  flex: 1; overflow: auto; background: var(--bg); padding: 14px;
+  display: flex; align-items: flex-start; justify-content: safe center;
+}
+#svg-wrap[hidden] { display: none; }
+/* Sag tusla kaydirma suruyor (js/viewer.js `initZoomGestures`). */
+#svg-wrap.panning { user-select: none; }
+/* Yakinlastirmada genislik JS ile piksel olarak verilir; max-width kisitlamasi
+   olursa buyutme calismaz. */
+#svg-wrap svg { height: auto; flex: 0 0 auto; }
+.vsvg .hot { transition: opacity .08s; }
+.vsvg .hot:hover { opacity: .72; }
+
+#tooltip {
+  position: fixed; z-index: 90; pointer-events: none;
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--accent); border-radius: 6px;
+  padding: 5px 9px; font-size: 12px; white-space: nowrap;
+  /* Once `0 4px 14px` yaziyordu; ipucu golgesi olarak `--shadow-sm` ile
+     birlestirildi — iki piksellik fark ayri bir belirtec tutmaya degmiyor. */
+  box-shadow: var(--shadow-sm);
+}
+#tooltip[hidden] { display: none; }
+
+/* 9.6.2 — bes gorunum kipi. Olcunun TEK kaynagi `panel.js`teki
+   `GALLERY_VIEWS`; buraya `--gshot` olarak yaziliyor ve CSS onu yalnizca
+   OKUYOR. Kip basina piksel degerini burada ikinci kez yazmak, uretim kutusu
+   (JS) ile gosterim kutusunun (CSS) sessizce ayrismasi demekti. */
+#gallery-wrap {
+  flex: 1; overflow: auto; background: var(--bg); padding: 14px;
+  display: grid; gap: 14px; align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--gshot, 124px) + 46px), 1fr));
+}
+/* Liste ve Ayrinti tek sutun: kart yatay, onizleme solda. */
+#gallery-wrap[data-view="list"],
+#gallery-wrap[data-view="detail"] { grid-template-columns: 1fr; }
+#gallery-wrap[hidden] { display: none; }
+.gcard {
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+/* ⚠ Yatay kipte yuksekligi KART tasiyor, onizleme kutusu degil. Yukseklik
+   yalnizca `.shot` uzerinde dururken izgara satiri ona gore buyumuyordu:
+   kart 103 px kaliyor, `overflow: hidden` de onizlemeyi kirpiyordu. Olcu
+   `min-height`: Ayrinti'nin ucuncu satiri karti gerektiginde uzatabilsin. */
+[data-view="list"] .gcard,
+[data-view="detail"] .gcard {
+  flex-direction: row; align-items: stretch;
+  min-height: calc(var(--gshot) + 16px);
+}
+[data-view="list"] .gcard .shot,
+[data-view="detail"] .gcard .shot {
+  width: calc(var(--gshot) + 16px); height: auto; flex: none;
+}
+[data-view="list"] .gcard .meta,
+[data-view="detail"] .gcard .meta { align-self: center; }
+/* Kaynak satiri: uzun yol karti tasirmasin diye kirilabilir ve sonuk. */
+.gcard .meta .gsrc {
+  display: block; margin-top: 2px; color: var(--muted); opacity: .8;
+  word-break: break-all;
+}
+.gcard .shot {
+  height: var(--gshot, 124px); display: flex; align-items: center;
+  justify-content: center; background: var(--shot-bg); padding: 8px;
+}
+.gcard .shot img { max-width: 100%; max-height: 100%; }
+/* 9.6.4 — secili kart. Vurgu `outline` ile degil kenar + golgeyle: odak
+   halkasi (`:focus-visible`) `outline` kullaniyor, ikisi ayni cizgide
+   karisirdi. Golge kartin kendi `overflow: hidden`ina takilmaz. */
+.gcard.selected {
+  border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent);
+  background: var(--accent-dim);
+}
+/* 9.6.1 — onizleme gelene kadarki bos kutu. Kart YERINI SIMDIDEN tutar (`.shot`
+   sabit yukseklikli); aksi halde onizlemeler damladikca izgara zipliyor ve
+   gozlemci yeni kartlari gorunur sayip hepsini birden istiyor. */
+.gcard .shot.loading { box-shadow: inset 0 0 0 1px var(--line); }
+.gcard .shot.toobig,
+.gcard .shot.failed {
+  color: var(--muted); font-size: 11px; text-align: center; line-height: 1.4;
+}
+/* Uzun yol karti tasirmasin: `.gcard`ta `overflow: hidden` var, sarmayan
+   metin sessizce KIRPILIRDI (yolun yarisi gorunur, sonu yok olurdu). */
+.gcard .meta {
+  padding: 8px 10px; font-size: 11px; color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.gcard .meta b {
+  display: block; color: var(--text); font-weight: 600; font-size: 11.5px;
+  word-break: break-all; margin-bottom: 3px;
+}
+.gempty { color: var(--muted); padding: 30px 4px; grid-column: 1 / -1; }
+/* 9.6.3 — kaynak grubunun basligi. Izgara kiplerinde de tam satiri kaplar
+   (`.gempty` ile ayni gerekce), yoksa bir kart genisligine sikisirdi. */
+.ghead {
+  grid-column: 1 / -1; color: var(--muted); font-size: 11px; font-weight: 600;
+  letter-spacing: .02em; padding: 4px 2px 0; border-bottom: 1px solid var(--line);
+  word-break: break-all;
+}
+.ghead:not(:first-child) { margin-top: 8px; }
+/* 9.6.5.1 — mutlak yol izin cubugu; izgarada tam satiri kaplar. */
+.gnotice {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border: 1px solid var(--accent-line); border-radius: 8px;
+  background: var(--accent-dim); color: var(--accent-fg); font-size: 11.5px;
+}
+.gnotice span { flex: 1; }
+
+/* Tablo hucresindeki gorsel onizlemesi */
+td.cell-img { padding: 3px 6px; }
+td.cell-img img {
+  max-height: 40px; max-width: 100%; border-radius: 3px; vertical-align: middle;
+  border: 1px solid var(--line);
+}
+td.cell-img .noimg { color: var(--muted); font-size: 11px; }
+tbody tr.row:has(td.cell-img) td { vertical-align: middle; }
+
+/* Oneri kartlari "i" dugmesinin ICINDE (Faz 7.4b): serit halinde durunca fazla
+   yer kapliyor ve kullaniciyi asagidaki secicilerden once kendine cekiyordu.
+   Icerik secili moda gore suzulur — mod zaten belli oldugu icin kart basligi
+   yalnizca sutun adini tasir. */
+.menu.chart-cards { min-width: 280px; left: 0; right: auto; }
+.chart-card {
+  display: flex; align-items: baseline; gap: 8px; width: 100%;
+  background: none; border: 0; border-radius: 5px;
+  padding: 7px 9px; color: var(--text); text-align: left;
+}
+.chart-card:hover { background: var(--panel); }
+.chart-card .ico {
+  width: 14px; height: 14px; flex: 0 0 14px; color: var(--export);
+  align-self: center;
+}
+.chart-card .ico path { fill: currentColor; }
+.chart-card b { font-size: 12.5px; font-weight: 600; }
+.chart-card span { font-size: 11px; color: var(--muted); margin-left: auto; }
+.card-empty { color: var(--muted); font-size: 11.5px; padding: 6px 9px; }
+
+/* Secili olcumun aciklamasi: ust satirdaki genel nottan ayrilsin diye
+   olcunun rengini tasir ve biraz daha kucuk. */
+.sub-note.agg-note { color: var(--export); opacity: .85; margin-top: 2px; }
+.sub-note.agg-note[hidden] { display: none; }
+
+/* Grafik denetimleri panelin geri kalanindan ~1.6 kat buyuk: ikonlarin ve
+   secimlerin okunurlugu burada isin kendisi. */
+.chart-opts { display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+              justify-content: center; }
+/* Öneri düğmesi Agent şeridindeki `i` ile AYNI dili konuşur: italik serif harf,
+   zemin yalnızca hover'da (`.btn.icon`). Satır içi SVG'ye gerek yok — `i` her
+   yazı tipinde var, tofu riski taşımıyor. Grafik denetimleri panelin geri
+   kalanından ~1.6 kat büyük olduğu için kutu da büyütüldü. */
+#chart-info {
+  width: 32px; height: 32px; font-size: 17px;
+  font-style: italic; font-weight: 700; font-family: Georgia, serif;
+}
+.chart-opts label[hidden] { display: none; }
+#chart-modes .segbtn { font-size: 12px; padding: 6px 12px; }
+.chart-opts label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+}
+/* Odak kenarligi genel `select:focus` kuralindan gelir (dosyanin basi) ve
+   `--field-line` ile dagitilir; burada ikinci bir kopya tutulmaz. */
+.chart-opts select {
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--field-line, var(--line));
+  border-radius: 6px; padding: 7px 10px; font-size: 14px; max-width: 220px;
+}
+
+/* Tur secici: `<option>` icine ikon konamadigi icin acilir menu elle kuruldu. */
+.btn.ctype {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 9px; background: var(--panel-2);
+}
+.btn.ctype .ico { width: 20px; height: 20px; }
+.btn.ctype .ico path { fill: currentColor; }
+#chart-type-menu { min-width: 170px; }
+.ctype-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.ctype-item .ico { width: 18px; height: 18px; flex: 0 0 18px; }
+.ctype-item .ico path { fill: currentColor; }
+.ctype-item.on { color: var(--export); }
+
+#text-info { flex: 1; font-size: 11.5px; color: var(--muted); }
+#text-info.ok { color: var(--export); }
+#text-info.error { color: var(--danger); }
+
+/* --- Agent sohbet seridi -------------------------------------------------- */
+/* Ana alanin YANINDA durur, ustunde degil: tablo acikken soru sorulabilsin.
+   Genislik kullanicidan gelir (sol kenardaki tutamak), oturum boyunca korunur. */
+
+/* 400 px hem acilis hem ALT sinirdir (js/agent.js `DOCK_MIN_W`) — ikisi birlikte
+   degistirilir. Daha darda mesaj balonlari okunmaz hale geliyor. */
+.cdock {
+  position: relative;
+  width: 400px; flex: 0 0 400px;
+  background: var(--panel); border-left: 1px solid var(--line);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.cdock[hidden] { display: none; }
+/* Cekmece (9.14.4, js/agent.js `fitLayout`): kenar cubugu daraldigi halde ana
+   alan `MAIN_MIN_W`i koruyamiyorsa serit ana alanin USTUNE biner, ana alan
+   genisligini korur. Kaplamanin (50) altinda kalir; tutamac gizlenir. */
+#app { position: relative; }
+.cdock.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 30;
+  box-shadow: var(--shadow-lg);
+}
+.cdock.drawer .cdock-grip { display: none; }
+
+.cdock-grip {
+  position: absolute; left: -3px; top: 0; bottom: 0; width: 6px;
+  z-index: 3;
+}
+.cdock-grip:hover { background: var(--agent-grip); }
+
+/* ⚠ Serit UCUNCU paneldir ve basligi da `--head-h` okumali: sol panel ile arac
+   cubugu hizalanip bu unutulunca serit 53 px'te kaliyor ve alt sinir 11 piksel
+   kayiyordu. Yeni bir panel eklenirse basligi yine buradan olculmeli. */
+.cdock-head {
+  display: flex; align-items: center; gap: 8px;
+  height: var(--head-h); box-sizing: border-box;
+  padding: 0 10px 0 13px; border-bottom: 1px solid var(--line);
+}
+.cdock-mark { color: var(--agent); font-size: 14px; line-height: 1; }
+.cdock-name { flex: 1; min-width: 0; }
+.cdock-name b { font-size: 13px; font-weight: 600; }
+.cdock-name span {
+  display: block; font-size: 10.5px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* 9.27 — degerler gidiyor: belge adinin altinda, uyari renginde tek satir.
+   ⚠ `[hidden]` kurali sart: ustteki `display: block` niteligi ezerdi. */
+.cdock-name .cdock-values { color: var(--warn); }
+.cdock-name .cdock-values[hidden] { display: none; }
+
+.ibtn {
+  background: transparent; border: 1px solid transparent; color: var(--muted);
+  width: 24px; height: 24px; border-radius: 6px;
+  font-size: 12px; line-height: 1; flex: 0 0 24px;
+}
+.ibtn:hover { background: var(--panel-2); color: var(--text); border-color: var(--line); }
+.ibtn.close:hover { color: var(--danger); border-color: var(--danger-line); }
+#cdock-info { font-style: italic; font-weight: 700; font-family: Georgia, serif; }
+
+.cthread {
+  flex: 1; min-height: 0; overflow: auto;
+  padding: 14px 12px; display: flex; flex-direction: column; gap: 10px;
+}
+
+.cmsg {
+  position: relative; border-radius: 10px; padding: 9px 12px;
+  font-size: 12.5px; line-height: 1.6; word-wrap: break-word; overflow-wrap: anywhere;
+}
+.cmsg.user {
+  align-self: flex-end; max-width: 88%;
+  background: var(--accent-dim); border: 1px solid var(--accent-line);
+}
+.cmsg.bot {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-left: 2px solid var(--agent);
+}
+.cmsg.err {
+  background: var(--danger-dim); border: 1px solid var(--danger-line);
+  color: var(--danger-fg);
+}
+.cmsg.note {
+  background: var(--bg); border: 1px dashed var(--line);
+  color: var(--muted); font-size: 11.5px;
+}
+
+/* Yanit metni sade markdown olarak cizilir — baslik, madde, kalin, kod. */
+.cmsg p { margin: 0 0 7px; }
+.cmsg p:last-child { margin-bottom: 0; }
+.cmsg h4 { margin: 10px 0 5px; font-size: 12.5px; color: var(--agent-fg); }
+.cmsg h4:first-child { margin-top: 0; }
+.cmsg ul { margin: 0 0 7px; padding-left: 18px; }
+.cmsg li { margin: 2px 0; }
+.cmsg code {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+  padding: 0 4px; font: 11.5px/1.4 var(--mono);
+}
+.cmsg pre {
+  max-height: 280px; overflow: auto; margin: 6px 0 0; padding: 8px 10px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  white-space: pre; font: 11px/1.5 var(--mono);
+  color: var(--text-2);
+}
+
+/* Baloncugun UST KENARINA oturur: icine konursa metnin ilk satirini orter. */
+.cmcopy {
+  position: absolute; top: -9px; right: 8px; opacity: 0;
+  background: var(--panel); border: 1px solid var(--line); color: var(--muted);
+  border-radius: 5px; padding: 2px 7px; font-size: 10.5px;
+}
+.cmsg:hover .cmcopy { opacity: 1; }
+.cmcopy:hover { color: var(--text); border-color: var(--agent); }
+
+/* Bos sohbet: ornek sorular yalnizca BURADA ve bilgi baloncugunda durur,
+   yazmaya baslayinca kaybolur — arayuzun kalicı parcasi degildir. */
+.cintro { margin: auto 0; text-align: center; color: var(--muted); }
+.cintro .big { font-size: 22px; color: var(--agent); display: block; margin-bottom: 6px; }
+.cintro p { font-size: 12px; margin: 0 6px 12px; line-height: 1.6; }
+
+.cchips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.cchip {
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+  border-radius: 14px; padding: 5px 12px; font-size: 11.5px;
+}
+.cchip:hover { border-color: var(--agent); color: var(--agent-fg); }
+
+.cdots { display: inline-flex; gap: 4px; align-items: center; }
+.cdots i {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--agent);
+  animation: cblink 1.1s infinite ease-in-out;
+}
+.cdots i:nth-child(2) { animation-delay: .18s; }
+.cdots i:nth-child(3) { animation-delay: .36s; }
+@keyframes cblink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+/* Besteci tek cerceve: metin ustte, denetimler altinda. Kenarlik ve zemin
+   KAPSAYICIDA durur — textarea seffaf ve kenarliksizdir, yoksa cercevenin
+   icinde ikinci bir kutu gorunur. */
+.ccompose {
+  margin: 8px; padding: 8px 8px 7px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.ccompose:focus-within { border-color: var(--agent); }
+.ctools { display: flex; align-items: center; gap: 6px; }
+/* Kutu icerige gore YUKARI buyur (yukseklik JS'te olculur); sinira gelince
+   kaydirir. Kaydirma cubugu erken cikmasin diye tasmayana kadar gizli. */
+#cdock-q {
+  resize: none; min-height: 22px; max-height: 220px; overflow-y: hidden;
+  background: none; border: 0; padding: 2px 2px 0;
+  color: var(--text);
+  font: 12.5px/1.5 var(--font);
+}
+#cdock-q:focus { outline: none; }
+
+/* Model ve caba secicileri: duz etiket (`Opus`, `Orta`), cerceve yalnizca
+   hover'da belirir — denetimler metin kutusunun onune gecmemeli. */
+.pickbtn {
+  background: none; border: 1px solid transparent; border-radius: 6px;
+  color: var(--muted); padding: 3px 8px; font-size: 11px; white-space: nowrap;
+}
+.pickbtn:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
+.pickbtn:disabled { opacity: .35; }
+
+.btn.csend {
+  margin-left: auto; width: 26px; height: 26px; padding: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--agent); border-color: var(--agent); color: var(--on-agent);
+}
+/* Yukari bakan `>`: cizgi olarak cizilir, yazi tipine birakilmaz. */
+.btn.csend .ico {
+  width: 14px; height: 14px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.btn.csend:disabled { opacity: .35; }
+
+/* Serit en altta: menuler YUKARI acilir, yoksa pencerenin disina tasar.
+   Duegmeye sola hizali, cunku secicilerin ikisi de solda duruyor. */
+#model-menu, #effort-menu {
+  top: auto; bottom: calc(100% + 6px); left: 0; right: auto; z-index: 70;
+  min-width: 210px; max-width: 250px;
+}
+/* Secici satirinda etiket ANA metindir; `.desc` menunun geri kalaninda soluk
+   ve kucuk, burada degil. */
+.menu-item.pick .desc { color: var(--text); font-size: 12.5px; }
+/* Secili satir: nokta yerine ARAYUZ RENGI. Nokta sutunu (`.ext`, 52 px)
+   yatay yer kaplayip menuyu genisletiyordu. */
+.menu-item.pick.on { background: var(--agent-pick); }
+.menu-item.pick.on .desc { color: var(--agent-fg); }
+.menu-item.pick.on .mnote { color: var(--agent-muted); }
+/* Menu satirinin ikinci satiri: secenegin ne ise yaradigi. */
+.menu-item .mnote {
+  display: block; color: var(--muted); font-size: 10px; line-height: 1.45;
+  margin-top: 2px;
+}
+
+.cfoot { padding: 0 12px 8px; font-size: 10.5px; color: var(--muted); min-height: 13px; }
+.cfoot.ok { color: var(--export); }
+.cfoot.error { color: var(--danger); }
+
+/* Bilgi baloncugu: "burasi ne ise yarar" ve ornek sorular. Ilk aciliste
+   kendiliginden gorunur, sonra basliktaki i dugmesinden cagrilir. */
+.cpop {
+  position: absolute; top: 42px; left: 10px; right: 10px; z-index: 12;
+  background: var(--panel-2); border: 1px solid var(--agent-line); border-radius: 10px;
+  padding: 12px; box-shadow: var(--shadow-pop); font-size: 12px;
+}
+.cpop[hidden] { display: none; }
+.cpop header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.cpop header b { flex: 1; font-size: 12.5px; }
+.cpop p { margin: 0 0 9px; color: var(--text-2); line-height: 1.6; }
+.btn.cpop-link { width: 100%; font-size: 12px; }
+
+/* --- Fare imleci ailesi (Faz 8.1) -----------------------------------------
+
+   Imlec o an ne YAPILABILECEGINI soyler; sekil dort durumu tasir:
+
+     {.}  bosta          — nokta tam merkezde, tiklama noktasi orasi
+     { }  sol tus basili — nokta kaybolur
+     {.}  90 derece      — tiklanabilir oge uzerinde
+     { }  90 derece      — basili tiklanabilir VE kaydirma (pan)
+     [-]  0 / 45 derece  — boyutlandirma, suruklenecek eksene gore
+
+   Uc kural bu blokta gecerlidir:
+
+   1. Data URI `url("...")` TIRNAK ICINDE yazilir ve renkler `white`/`black`
+      anahtar kelimeleriyle verilir. `#fff` yazilsaydi URL ayristiricisi `#`
+      isaretini parca (fragment) baslangici sayardi; tirnakli dizgede `<` ve
+      `>` ise kacislamaya gerek duymaz.
+   2. Hotspot her zaman `16 16` — yani 32x32'lik sahnenin TAM MERKEZI. Sekil
+      tiklama noktasinin etrafini sarar, ustune binmez.
+   3. Her ogeye `cursor` yazilmaz; oge yalnizca `--cur` (ve gerekirse
+      `--cur-down`) degiskenini kurar, dagitimi asagidaki tek `*` kurali
+      yapar. Ozel ozellikler kalittigi icin cocuk ogeler de dogru imleci alir
+      ve dev secici listesi iki kez tekrarlanmaz. */
+
+:root {
+  /* {.} — varsayilan */
+  --cur-idle: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M11.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M20.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M11.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M20.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g><circle cx='16' cy='16' r='2.6' fill='black' fill-opacity='.5'/><circle cx='16' cy='16' r='1.5' fill='white'/></svg>") 16 16, auto;
+
+  /* { } — sol tus basili: nokta kaybolur VE parantezler birbirine yaklasir.
+     Yaklasma kasitli: yalnizca nokta kaybolsaydi basma anı zayif okunuyordu;
+     sikisma hareketi tiklamayi hissettiriyor. Kaydirma 3 px (ucdan uca 17 -> 11). */
+  --cur-idle-down: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M14.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M17.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M14.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M17.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g></svg>") 16 16, auto;
+
+  /* {.} 90 derece — tiklanabilir */
+  --cur-hot: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g transform='rotate(90 16 16)'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M11.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M20.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M11.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M20.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g></g><circle cx='16' cy='16' r='2.6' fill='black' fill-opacity='.5'/><circle cx='16' cy='16' r='1.5' fill='white'/></svg>") 16 16, pointer;
+
+  /* { } 90 derece, yaklasmis — basili tiklanabilir ve kaydirma (pan) */
+  --cur-hot-down: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g transform='rotate(90 16 16)'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M14.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M17.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M14.5 9q-2 0-2 2v2q0 2-2 3 2 1 2 3v2q0 2 2 2'/><path d='M17.5 9q2 0 2 2v2q0 2 2 3-2 1-2 3v2q0 2-2 2'/></g></g></svg>") 16 16, grabbing;
+
+  /* (.) — surukleme: parantez, kase degil. Sutun basligi hem tiklanir hem
+     suruklenir; ayri sekil olmasaydi ikisi ayirt edilemezdi.
+     Yaricap 8 px, kiris 15 px — yani yarim cemberin UCLARINDAN ~20 derece
+     kirpilmis hali. Kirpma sart: tam yarim cemberde uclar cemberin tepe ve
+     dip noktasina denk gelir, orada teget YATAYDIR ve parantez ucalari iceri
+     dogru duzlesir. Daha buyuk yaricap (r=11) ya da kubik egri denendi;
+     ikisi de yuvarlakligi kaybedip koseli gorundu. */
+  --cur-drag: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M13 8.5a8 8 0 0 0 0 15'/><path d='M19 8.5a8 8 0 0 1 0 15'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M13 8.5a8 8 0 0 0 0 15'/><path d='M19 8.5a8 8 0 0 1 0 15'/></g><circle cx='16' cy='16' r='2.6' fill='black' fill-opacity='.5'/><circle cx='16' cy='16' r='1.5' fill='white'/></svg>") 16 16, grab;
+
+  /* ( ) — surukleme basili: nokta gider, parantezler yaklasir */
+  --cur-drag-down: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round'><path d='M14.5 8.5a8 8 0 0 0 0 15'/><path d='M17.5 8.5a8 8 0 0 1 0 15'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'><path d='M14.5 8.5a8 8 0 0 0 0 15'/><path d='M17.5 8.5a8 8 0 0 1 0 15'/></g></svg>") 16 16, grabbing;
+
+  /* >< — metin secme. Uclar arasinda 7 px BOSLUK birakilir: daha yakinken
+     iki cizgi halosuyla birlesip `X` gibi okunuyordu. Bosluk ayrica ekleme
+     noktasini (hotspot) ortada acikta birakir. */
+  --cur-text: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'><path d='M8 9l4.5 7-4.5 7'/><path d='M24 9l-4.5 7 4.5 7'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M8 9l4.5 7-4.5 7'/><path d='M24 9l-4.5 7 4.5 7'/></g></svg>") 16 16, text;
+
+  /* [-] — yatay boyutlandirma (sutun tutamagi, serit tutamagi) */
+  --cur-size: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'><path d='M11 9H8.5v14H11'/><path d='M21 9h2.5v14H21'/><path d='M13 16h6'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M11 9H8.5v14H11'/><path d='M21 9h2.5v14H21'/><path d='M13 16h6'/></g></svg>") 16 16, col-resize;
+
+  /* [-] 45 derece — kosegen boyutlandirma (panel kosesi) */
+  --cur-size-d: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g transform='rotate(45 16 16)'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'><path d='M11 9H8.5v14H11'/><path d='M21 9h2.5v14H21'/><path d='M13 16h6'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M11 9H8.5v14H11'/><path d='M21 9h2.5v14H21'/><path d='M13 16h6'/></g></g></svg>") 16 16, nwse-resize;
+
+  /* [] KAPALI — sol tus basiliyken. Ailenin geri kalaninda basili durum
+     "yaklasmis" demek (`{.}` → `{ }`); boyutlandirma da ayni dili konusur:
+     parantezler ortaya gelir ve aradaki cizgi kalkar. Eksen yine gorunur —
+     onu cizgi degil parantezlerin YONU tasiyor. */
+  --cur-size-down: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'><path d='M15 9h-2.5v14H15'/><path d='M17 9h2.5v14H17'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M15 9h-2.5v14H15'/><path d='M17 9h2.5v14H17'/></g></svg>") 16 16, col-resize;
+
+  /* [] 45 derece kapali */
+  --cur-size-d-down: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g transform='rotate(45 16 16)'><g fill='none' stroke='black' stroke-opacity='.5' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'><path d='M15 9h-2.5v14H15'/><path d='M17 9h2.5v14H17'/></g><g fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M15 9h-2.5v14H15'/><path d='M17 9h2.5v14H17'/></g></g></svg>") 16 16, nwse-resize;
+}
+
+/* Dagitim: `--cur` kurulmamis her oge varsayilana duser. `body.pressing`
+   yalnizca SOL tus icin eklenir (`initPressCursor`), boylece sag tusla
+   kaydirma kendi imlecini korur. */
+* { cursor: var(--cur, var(--cur-idle)); }
+/* `body` kendisi de listede: `body.pressing *` yalnizca ALT ogeleri secer ve
+   govdenin cocuk tarafindan ortulmeyen bosluklarinda nokta kalirdi. */
+body.pressing, body.pressing * { cursor: var(--cur-down, var(--cur-idle-down)); }
+
+/* Tiklanabilir olan her sey. Devre disi dugme bu listede DEGIL: tiklanamayan
+   bir oge tiklanabilir gorunmemeli, varsayilan imlecte kalir. */
+.btn, .tab, .segbtn, .tnode, .expander, .badge, .menu label, .menu-item,
+.chart-card, .close-btn, .ibtn, .zbtn, .cchip, .cmcopy, .tbl-corner,
+.pickbtn, .vsvg .hot, select, .caret, .appbtn {
+  --cur: var(--cur-hot);
+  --cur-down: var(--cur-hot-down);
+}
+.btn:disabled, .tab:disabled, .segbtn:disabled, .pickbtn:disabled, select:disabled {
+  --cur: var(--cur-idle);
+  --cur-down: var(--cur-idle-down);
+}
+
+/* Boyutlandirma tutamaklari basiliyken KAPANIR (`[-]` → `[]`), tipki `{.}` →
+   `{ }` gibi: basili durum ailenin her yerinde "yaklasmis" demek. Eksen bilgisi
+   kaybolmaz — onu ortadaki cizgi degil parantezlerin yonu tasiyor. */
+.resizer, .cdock-grip { --cur: var(--cur-size); --cur-down: var(--cur-size-down); }
+.resize-grip { --cur: var(--cur-size-d); --cur-down: var(--cur-size-d-down); }
+
+/* Metin alanlari `><` alir — ailenin disinda kalan tek sistem imleci
+   kalmasin diye. Sekil dar ve merkezde bulustugu icin secim noktasi kaybolmaz. */
+input, textarea, td, .cmsg { --cur: var(--cur-text); --cur-down: var(--cur-text); }
+td.cell-img img { --cur: zoom-in; --cur-down: zoom-in; }
+.th-sparse { --cur: help; --cur-down: help; }
+
+/* Sutun basligi hem SURUKLENIR hem TIKLANIR (siralama). Surukleme kendi
+   seklini alir: parantez, kase degil. */
+thead th .th-inner { --cur: var(--cur-drag); --cur-down: var(--cur-drag-down); }
+
+/* Kaydirma sirasinda cizimin ICINDEKI etkilesimli ogeler de pan imlecini
+   alir; yoksa `.hot` uzerinden gecerken sekil titrer. ID secicisi
+   `.vsvg .hot` kuralini yener. */
+#svg-wrap.panning, #svg-wrap.panning * {
+  --cur: var(--cur-hot-down);
+  --cur-down: var(--cur-hot-down);
+}
+
+/* Sutun suruklenirken imlec, isaretci hangi ogenin uzerinden gecerse gecsin
+   surukleme seklinde kalir (`js/columns.js startColDrag`). Native HTML5 DnD ile bu
+   mumkun degildi: orada imleci isletim sistemi cizer.
+
+   Sinif IKI KEZ yazilir. Tek yazimda ozgulluk (0,1,1) olur ve `thead th
+   .th-inner` (0,1,2) kuralini YENEMEZ — surukledigin basligin tam ustunde
+   noktali `(.)` kalirdi. Ikinci sinif ozgullugu (0,2,1) yapar; sinif sayisi
+   once karsilastirildigi icin bu, oge sayisi daha yuksek kurallari da gecer. */
+body.col-dragging.col-dragging,
+body.col-dragging.col-dragging * {
+  --cur: var(--cur-drag-down);
+  --cur-down: var(--cur-drag-down);
+  user-select: none;
+}
